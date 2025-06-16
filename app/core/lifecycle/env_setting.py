@@ -4,7 +4,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from app.core.constant.env_constant import REQUIRED_KEY
 from app.core.constant.path_constant import ENV_PATH
 from app.core.logger.logger_config import get_logger
 

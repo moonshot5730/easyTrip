@@ -12,7 +12,7 @@ from app.external.openai.openai_client import test_openai_key
 
 logger = get_logger()
 
-def _validate_env_keys():
+def validate_env_keys():
     missing_keys = [key for key in REQUIRED_KEY if not os.environ.get(key)]
 
     if missing_keys:
@@ -20,10 +20,9 @@ def _validate_env_keys():
             f"다음 필수 환경 변수가 설정되지 않았습니다:  {', '.join(missing_keys)} 해당 환경 변수는 필수 정보입니다. 시스템을 종료합니다."
         )
         sys.exit(1)
-    logger.info("모든 필수 환경 변수가 설정되었습니다. :)")
+    logger.info(f"{REQUIRED_KEY}의 API-KEY가 정상적으로 설정되었습니다. 필요한 경우 API-KEY 검증 로직을 수행해보세요. :)")
 
 def validate_llm_keys():
-    _validate_env_keys()
     openai_ok = test_openai_key()
     gemini_ok = test_gemini_key()
 
