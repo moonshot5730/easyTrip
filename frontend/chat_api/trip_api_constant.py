@@ -1,0 +1,1 @@
+TEST_API_URL = "http://localhost:8000/trip/plan/test/stream"
