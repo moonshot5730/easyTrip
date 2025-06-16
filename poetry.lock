@@ -2391,6 +2391,20 @@ pymysql = ["pymysql"]
 sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
+name = "sseclient"
+version = "0.0.27"
+description = "Python client library for reading Server Sent Event streams."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sseclient-0.0.27.tar.gz", hash = "sha256:b2fe534dcb33b1d3faad13d60c5a7c718e28f85987f2a034ecf5ec279918c11c"},
+]
+
+[package.dependencies]
+requests = ">=2.9"
+six = "*"
+
+[[package]]
 name = "starlette"
 version = "0.46.2"
 description = "The little ASGI library that shines."
@@ -2862,4 +2876,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13"
-content-hash = "6e3400a8557dede620fc1abddc3a2f2f15d73194d6441c6cba2d4171d4188548"
+content-hash = "cb950ef40b3e8a41118a1a382b4592936106c99d0606544f913ef6dea1796400"
