@@ -12,7 +12,9 @@ async def lifespan(app: FastAPI):
     load_env()
     yield
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.get("/")
 async def read_root():
