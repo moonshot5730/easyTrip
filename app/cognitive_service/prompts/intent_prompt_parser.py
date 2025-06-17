@@ -4,8 +4,12 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel
 
+from app.cognitive_service.agents.agent_state import AgentState
+
+
+
 class IntentOutput(BaseModel):
-    action: Literal["search_travel_info", "create_travel_plan", "manage_travel_calendar", "share_travel_plan", "trip_conversation"]
+    action: Literal["search_travel_info", "create_travel_plan", "manage_travel_calendar", "share_travel_plan", "travel_conversation"]
     keywords: str
 
 
@@ -32,7 +36,7 @@ intent_prompt_template = PromptTemplate.from_template("""
   완성된 여행 계획을 다른 사람과 공유하고자 할 때 선택.
   EX: "이 계획 친구한테 보내줘", "공유 링크 만들어줘", "공유하고 싶어"
 
-- trip_conversation (여행과 관련된 대화)
+- travel_conversation (여행과 관련된 대화)
   일정, 여행지, 여행 스타일, 교통 수단 등등 여행과 관련된 대화를 진행할 때.  
 
 JSON 형식:
@@ -49,3 +53,16 @@ JSON 형식:
 
 # `format_instructions`를 삽입하여 모델이 응답 형식 맞추도록 유도
 intent_prompt_template = intent_prompt_template.partial(format_instructions=intent_parser.get_format_instructions())
+
+def extract_intent_as_action(state: AgentState) -> str:
+    # 지정된 action이 없거나 유효하지 않으면 fallback
+    valid_actions = {
+        "search_travel_info",
+        "create_travel_plan",
+        "manage_travel_calendar",
+        "share_travel_plan",
+        "travel_conversation"
+    }
+
+    action = state.get("action", "travel_conversation")
+    return action if action in valid_actions else "travel_conversation"
