@@ -1,10 +1,12 @@
-from typing import List, Dict, Generator
+from typing import Dict, Generator, List
 
 import requests
 from requests import RequestException
 
 
-def get_streaming_response(messages: List[Dict[str, str]], api_url: str) -> Generator[str, None, None]:
+def get_streaming_response(
+    messages: List[Dict[str, str]], api_url: str
+) -> Generator[str, None, None]:
     """
     백엔드 SSE API로 메시지를 전송하고, 스트리밍 응답을 chunk 단위로 반환합니다.
 
@@ -17,10 +19,10 @@ def get_streaming_response(messages: List[Dict[str, str]], api_url: str) -> Gene
     """
     try:
         with requests.post(
-                api_url,
-                json={"messages": messages},
-                stream=True,
-                headers={"Accept": "text/event-stream"},
+            api_url,
+            json={"messages": messages},
+            stream=True,
+            headers={"Accept": "text/event-stream"},
         ) as resp:
             # HTTP 오류 발생 시 예외 처리
             resp.raise_for_status()

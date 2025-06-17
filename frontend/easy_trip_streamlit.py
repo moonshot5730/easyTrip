@@ -14,11 +14,12 @@ from frontend.chat_api.trip_api_constant import TEST_API_URL
 from frontend.client_constant.trip_plan_client import get_streaming_response
 from frontend.ui_component.chat_history_ui import render_chat_history
 
-
 st.title("🔁 SSE 기반 LLM 챗봇")
 
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "안녕하세요! 무엇을 도와드릴까요?"}]
+    st.session_state["messages"] = [
+        {"role": "assistant", "content": "안녕하세요! 무엇을 도와드릴까요?"}
+    ]
 
 # UI 렌더링
 render_chat_history(st.session_state.messages)
@@ -50,4 +51,6 @@ if prompt := st.chat_input("메시지를 입력하세요"):
                     collected += content + "\n"
                     full_response.markdown(collected.strip())
 
-        st.session_state["messages"].append({"role": "assistant", "content": collected.strip()})
+        st.session_state["messages"].append(
+            {"role": "assistant", "content": collected.strip()}
+        )
