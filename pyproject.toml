@@ -22,6 +22,7 @@ langchain-openai = "^0.3.23"
 google-genai = "^1.20.0"
 langchain-google-genai = "^2.1.5"
 sseclient = "^0.0.27"
+graph-builder = "^0.2.0"
 
 
 [build-system]

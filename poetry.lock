@@ -540,6 +540,17 @@ protobuf = ">=3.20.2,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4
 grpc = ["grpcio (>=1.44.0,<2.0.0)"]
 
 [[package]]
+name = "graph-builder"
+version = "0.2.0"
+description = "Graph generation and storage library with update tracking"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "graph_builder-0.2.0-py3-none-any.whl", hash = "sha256:a1082b77224abc60baaaed4bdded089af7a6c09622933023d7b856c83546a139"},
+    {file = "graph_builder-0.2.0.tar.gz", hash = "sha256:d22b80a64666a532fe7604a9d9145fb82f3a1871cd55259378bcfc166d90019e"},
+]
+
+[[package]]
 name = "greenlet"
 version = "3.2.3"
 description = "Lightweight in-process concurrent programming"
@@ -2876,4 +2887,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13"
-content-hash = "cb950ef40b3e8a41118a1a382b4592936106c99d0606544f913ef6dea1796400"
+content-hash = "c2b88db491571d90a037a95efacc8a3ce5a1f4d00e18aa7b5b3edda81b9cd51d"
