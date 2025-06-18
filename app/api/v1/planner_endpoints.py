@@ -14,7 +14,7 @@ async def trip_plan(chat_request: ChatRequest):
     #     event_generator,
     #     media_type="text/event-stream"
     # )
-
+    pass
 
 
 @trip_plan_router.get("/")
