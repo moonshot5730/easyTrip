@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 
 from app.cognitive_service.agent_langgraph.agent_state import ChatRequest
-from app.cognitive_service.agent_langgraph.graph_loader import agent_app
+from app.cognitive_service.agent_langgraph.agent_graph import agent_app
 from shared.event_constant import END_MSG, CHAIN_START, DATA_TAG, STEP_TAG, SPLIT_PATTEN
 from app.core.logger.logger_config import get_logger
 

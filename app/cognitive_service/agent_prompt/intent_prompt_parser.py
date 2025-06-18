@@ -1,11 +1,12 @@
 from typing import Literal
 
 from langchain_core.output_parsers import PydanticOutputParser
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.runnables import Runnable, RunnableLambda, RunnableMap
 from pydantic import BaseModel
 
 from app.cognitive_service.agent_langgraph.agent_state import AgentState
-
+from app.cognitive_service.agent_llm.llm_models import creative_openai_mini
 
 
 class IntentOutput(BaseModel):
@@ -66,3 +67,38 @@ def extract_intent_as_action(state: AgentState) -> str:
 
     action = state.get("action", "travel_conversation")
     return action if action in valid_actions else "travel_conversation"
+
+travel_advisor_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     "당신은 여행 계획을 도와주는 친절한 여행 컨설턴트입니다. "
+     "사용자의 여행 목적, 장소, 일정, 스타일을 자연스럽게 대화하며 파악하세요. "
+     "지나치게 질문하지 말고, 부드럽고 일상적인 대화처럼 이어가세요."),
+    ("human", "{input}")
+])
+
+extract_user_input: Runnable = RunnableLambda(
+    lambda state: {"input": next(
+        (message.content for message in reversed(state["messages"]) if message.type == "human"),
+        ""
+    )}
+)
+
+# 4. 응답을 state에 다시 추가하는 후처리 노드
+update_state_with_response: Runnable = RunnableLambda(
+    lambda input: {
+        **input,
+        "messages": input["messages"] + [input["response"]]
+    }
+)
+
+travel_conversation: Runnable = (
+    {
+        "input": extract_user_input,
+        "messages": lambda state: state["messages"]  # 그대로 넘겨줌
+    }
+    | RunnableMap({
+        "response": travel_advisor_prompt | creative_openai_mini,
+        "messages": lambda d: d["messages"]
+    })
+    | update_state_with_response
+)
