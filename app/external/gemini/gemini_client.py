@@ -9,7 +9,6 @@ from app.core.logger.logger_config import get_logger
 
 logger = get_logger()
 
-
 def test_gemini_key() -> bool:
     """
     OpenAI API 키의 유효성을 테스트합니다.
