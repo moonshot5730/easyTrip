@@ -8,10 +8,9 @@ root_path = str(Path(__file__).resolve().parent.parent)
 sys.path.append(root_path)
 print(f"Root path: {root_path}")
 
+from shared.event_constant import END_MSG, DATA_TAG, STEP_TAG
 import streamlit as st
 
-from frontend.chat_api.trip_api_constant import TEST_API_URL
-from frontend.client_constant.trip_plan_client import get_streaming_response
 from frontend.ui_component.chat_history_ui import render_chat_history
 
 st.title("🔁 SSE 기반 LLM 챗봇")
@@ -38,17 +37,26 @@ if prompt := st.chat_input("메시지를 입력하세요"):
 
         # 백엔드 클라이언트를 통해 응답 스트림 받기
         with requests.post(
-            "http://localhost:8000/trip/plan/test/stream",
+            "http://localhost:8000//trip/plan/astream-event",
             json={"messages": st.session_state["messages"]},
             stream=True,
             headers={"Accept": "text/event-stream"},
         ) as resp:
             for line in resp.iter_lines(decode_unicode=True):
-                if line.startswith("data: "):
-                    content = line.removeprefix("data: ")
-                    if content == "[DONE]":
+                if not line:
+                    continue
+
+                if line.startswith(f"{STEP_TAG} "):
+                    step_info = line.removeprefix(f"{STEP_TAG} ")
+                    collected += f"\n\n##### 🧭 {step_info}\n\n"
+                    full_response.markdown(collected.strip())
+
+                elif line.startswith(f"{DATA_TAG} "):
+                    print(f"데이터 라인 {line}")
+                    content = line.removeprefix(f"{DATA_TAG} ").strip()
+                    if content == END_MSG:
                         break
-                    collected += content + "\n"
+                    collected += content
                     full_response.markdown(collected.strip())
 
         st.session_state["messages"].append(

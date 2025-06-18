@@ -1,9 +1,24 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Annotated, Dict, Literal
 
 from langchain_core.messages import BaseMessage
+from langgraph.graph import add_messages
 
 
 class AgentState(TypedDict):
-    input: str                              # 사용자 입력 원문
-    action: str                             # 라우터가 판단한 액션
-    keywords: List[str]                     # 입력에서 추출된 핵심 키워드
+    messages: Annotated[list, add_messages]
+    action: Optional[str]
+    keywords: Optional[List[str]]
+    want_travel_city: Optional[str]
+    travel_schedule: Optional[str]
+    search_results: List[Dict[str, str]]
+
+
+class ChatMessage(TypedDict):
+    role: Literal["user", "assistant", "tool"]
+    content: str
+
+
+class ChatRequest(TypedDict):
+    messages: List[ChatMessage]
+
+

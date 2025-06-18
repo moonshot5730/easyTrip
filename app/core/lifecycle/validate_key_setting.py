@@ -1,10 +1,6 @@
 import os
 import sys
 
-import requests
-from google import genai
-from openai import AuthenticationError, OpenAI
-
 from app.core.constant.env_constant import REQUIRED_KEY
 from app.core.logger.logger_config import get_logger
 from app.external.gemini.gemini_client import test_gemini_key

@@ -7,7 +7,8 @@ from app.core.logger.logger_config import get_logger
 logger = get_logger()
 
 def safe_intent_router(input: dict) -> dict:
-    intent_router = (intent_prompt_template | precise_llm_nano).invoke(input)
+    last_message = input["messages"][-1].content
+    intent_router = (intent_prompt_template | precise_llm_nano).invoke(last_message)
 
     try:
         # output_parser.parse expects raw LLM string output
