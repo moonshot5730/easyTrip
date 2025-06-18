@@ -1,22 +1,21 @@
 import asyncio
 
 from fastapi import APIRouter
-from starlette.responses import StreamingResponse
 
-from app.external.openai.openai_client import precise_llm_nano
-from app.internal.use_case.trip_plan_agent_use_case import stream_trip_plan
 from app.schemes.chat_schemes import ChatRequest
 
 trip_plan_router = APIRouter(prefix="/trip/plan", tags=["trip plan agent"])
 
 @trip_plan_router.post("/test/stream")
 async def trip_plan(chat_request: ChatRequest):
-    event_generator = await stream_trip_plan(chat_request)
+    # event_generator = await stream_trip_plan(chat_request)
+    #
+    # return StreamingResponse(
+    #     event_generator,
+    #     media_type="text/event-stream"
+    # )
 
-    return StreamingResponse(
-        event_generator,
-        media_type="text/event-stream"
-    )
+
 
 @trip_plan_router.get("/")
 async def read_root():

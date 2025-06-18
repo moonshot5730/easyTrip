@@ -4,7 +4,7 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel
 
-from app.cognitive_service.agents.agent_state import AgentState
+from app.cognitive_service.agent_langgraph.agent_state import AgentState
 
 
 
