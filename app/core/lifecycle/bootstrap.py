@@ -7,11 +7,11 @@ from app.api.v1.planner_endpoints import trip_plan_router
 from app.core.lifecycle.env_setting import load_env
 from app.core.lifecycle.validate_key_setting import validate_env_keys
 
-
 allowed_origins = [
-    "http://localhost:8501",   # 개발용
+    "http://localhost:8501",  # 개발용
     "http://127.0.0.1:8501",
 ]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,9 +22,14 @@ async def lifespan(app: FastAPI):
 
     # 서버 종료 로직
 
+
 def boostrap():
 
-    app = FastAPI(title="여행 계획을 세워주는 멀티 에이전트 시스템", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="여행 계획을 세워주는 멀티 에이전트 시스템",
+        version="0.1.0",
+        lifespan=lifespan,
+    )
     app.include_router(trip_plan_router)
 
     app.add_middleware(

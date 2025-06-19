@@ -118,11 +118,15 @@ GOOGLE_CALENDAR_API_KEY="your_google_calendar_api_key"  # 구글 캘린더 등�
 
 ### 5.2 주의! 아래의 환경 변수 입력이 필요합니다.
 ```bash
-streamlit run easy_trip_streamlit.py                   # 스트림릿 UI 실행
+streamlit run easy_trip_streamlit.py   # 스트림릿 UI 실행
+streamlit run easy_trip_streamlit.py --server.runOnSave true  # 스트림릿 UI 실행
 python -m uvicorn main:app --reload    # API 서버 실행
 ```
 
 ## 6. 데모 및 사용 예시
+
+### 스트림릿 실행
+
 
 ### 대화 기반 장소 검색 예시
 
