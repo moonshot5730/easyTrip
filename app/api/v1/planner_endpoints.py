@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from starlette.responses import StreamingResponse
 
-from app.cognitive_service.agent_langgraph.agent_state import ChatRequest
+from app.cognitive_service.agent_langgraph.agent_graph_event import handle_streaming_event
+from app.schemes.agent_scheme import ChatRequest
 from app.cognitive_service.agent_langgraph.agent_graph import agent_app
 from shared.event_constant import END_MSG, CHAIN_START, DATA_TAG, STEP_TAG, SPLIT_PATTEN
 from app.core.logger.logger_config import get_logger
@@ -12,11 +13,16 @@ trip_plan_router = APIRouter(prefix="/trip/plan", tags=["trip plan agent"])
 @trip_plan_router.post("/astream-event")
 async def trip_plan(chat_request: ChatRequest):
     logger.info(f"사용자 요청 정보 : {chat_request}")
-    streaming_events = agent_app.astream_events(input=chat_request, version="v2")
+    streaming_events = agent_app.astream_events(
+        input=chat_request,
+        version="v2",
+        stream_mode=["updates"],
+        config={"configurable": {"thread_id": chat_request["session_id"]}},
+
+    )
 
     async def event_stream():
         async for se in streaming_events:
-            print(se)
             kind = se["event"]
             name = se.get("name")
             data = se.get("data")
