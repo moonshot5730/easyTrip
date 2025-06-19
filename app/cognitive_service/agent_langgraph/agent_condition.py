@@ -8,7 +8,7 @@ def should_go_to_router(state: AgentState) -> str:
     required_fields = [
         state.get("want_travel_city"),
         state.get("travel_schedule"),
-        state.get("travel_style")
+        state.get("travel_style"),
     ]
     # 최소 하나라도 비어 있으면 계속 대화
     if any(field is None for field in required_fields):

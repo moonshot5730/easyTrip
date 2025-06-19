@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Optional, Annotated, Dict
+from typing import Annotated, Dict, List, Optional, TypedDict
 
 from langgraph.graph import add_messages
 
@@ -13,5 +13,3 @@ class AgentState(TypedDict):
     travel_style: Optional[str]
 
     search_results: List[Dict[str, str]]
-
-

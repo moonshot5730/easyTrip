@@ -10,13 +10,14 @@ from frontend.client_constant.trip_api_constant import START_MESSAGE
 root_path = str(Path(__file__).resolve().parent.parent)
 sys.path.append(root_path)
 
-from shared.event_constant import END_MSG, DATA_TAG, STEP_TAG
 import streamlit as st
 
 from frontend.ui_component.chat_history_ui import render_chat_history
+from shared.event_constant import DATA_TAG, END_MSG, STEP_TAG
 
 st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="centered")
 st.title("🔁 SSE 기반 LLM 챗봇")
+
 
 def init_session_state():
     if "session_id" not in st.session_state:
@@ -24,6 +25,7 @@ def init_session_state():
 
     if "messages" not in st.session_state:
         st.session_state.messages = [START_MESSAGE]
+
 
 def reset_session():
     st.session_state.session_id = str(uuid.uuid4())
@@ -53,7 +55,10 @@ if prompt := st.chat_input("메시지를 입력하세요"):
         message_placeholder = st.empty()
         stream_response = ""
 
-        payload = {"messages": st.session_state["messages"], "session_id": st.session_state.session_id}
+        payload = {
+            "messages": st.session_state["messages"],
+            "session_id": st.session_state.session_id,
+        }
         with requests.post(
             "http://localhost:8000//trip/plan/astream-event",
             json=payload,

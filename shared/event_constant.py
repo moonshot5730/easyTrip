@@ -13,5 +13,3 @@ PROMPT_END = "on_prompt_end"
 
 CHAT_MODEL_START = "on_chat_model_start"
 CHAT_MODEL_STREAM = "on_chat_model_stream"
-
-

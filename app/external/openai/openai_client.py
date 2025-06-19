@@ -9,6 +9,7 @@ from app.core.logger.logger_config import get_logger
 
 logger = get_logger()
 
+
 def test_openai_key() -> bool:
     """
     OpenAI API 키의 유효성을 테스트합니다.
@@ -49,7 +50,6 @@ def test_openai_key() -> bool:
             f"OpenAI API 테스트 호출 과정에서 예상치 못한 예외가 발생했습니다: {e}"
         )
         return False
-
 
 
 creative_llm_nano = ChatOpenAI(

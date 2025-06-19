@@ -2,9 +2,10 @@ import json
 from dataclasses import dataclass
 
 from app.core.logger.logger_config import get_logger
-from shared.event_constant import SPLIT_PATTEN, DATA_TAG
+from shared.event_constant import DATA_TAG, SPLIT_PATTEN
 
 logger = get_logger()
+
 
 @dataclass(frozen=True)
 class LLMEvents:
@@ -12,11 +13,13 @@ class LLMEvents:
     STREAM: str = "on_llm_stream"
     END: str = "on_llm_end"
 
+
 @dataclass(frozen=True)
 class ChatModelEvents:
     START: str = "on_chat_model_start"
     STREAM: str = "on_chat_model_stream"
     END: str = "on_chat_model_end"
+
 
 @dataclass(frozen=True)
 class ChainEvents:
@@ -24,15 +27,18 @@ class ChainEvents:
     STREAM: str = "on_chain_stream"
     END: str = "on_chain_end"
 
+
 @dataclass(frozen=True)
 class ToolEvents:
     START: str = "on_tool_start"
     END: str = "on_tool_end"
 
+
 @dataclass(frozen=True)
 class RetrieverEvents:
     START: str = "on_retriever_start"
     END: str = "on_retriever_end"
+
 
 @dataclass(frozen=True)
 class PromptEvents:
@@ -47,11 +53,7 @@ def handle_streaming_event(event: dict):
     node_name = event.get("name")
     data = event.get("data", {})
 
-    sse_data = {
-        "kind": event_type,
-        "name": node_name,
-        "content": None
-    }
+    sse_data = {"kind": event_type, "name": node_name, "content": None}
 
     if event_type == ChainEvents.START:
         print(f"[🚀 체인 시작] 노드 이름: {node_name}", flush=True)
@@ -89,16 +91,25 @@ def handle_streaming_event(event: dict):
         print(f"[📝 LLM 종료] 노드 이름: {node_name}", flush=True)
 
     elif event_type == ToolEvents.START:
-        print(f"[🔧 툴 시작] 노드 이름: {node_name} 입력 정보: → {data.get('input')}", flush=True)
+        print(
+            f"[🔧 툴 시작] 노드 이름: {node_name} 입력 정보: → {data.get('input')}",
+            flush=True,
+        )
 
     elif event_type == ToolEvents.END:
-        print(f"[🔧 툴 종료] 노드 이름: {node_name} → 결과 정보:: {data.get('output')}", flush=True)
+        print(
+            f"[🔧 툴 종료] 노드 이름: {node_name} → 결과 정보:: {data.get('output')}",
+            flush=True,
+        )
 
     elif event_type == RetrieverEvents.START:
         print(f"[🔍 리트리버 시작] 노드 이름: {node_name}", flush=True)
 
     elif event_type == RetrieverEvents.END:
-        print(f"[🔍 리트리버 종료] 노드 이름: {node_name} → 문서 목록 정보: {len(data.get('documents', []))}", flush=True)
+        print(
+            f"[🔍 리트리버 종료] 노드 이름: {node_name} → 문서 목록 정보: {len(data.get('documents', []))}",
+            flush=True,
+        )
 
     elif event_type == PromptEvents.START:
         print(f"[🧱 프롬프트 시작] 노드 이름: {node_name}", flush=True)
@@ -108,7 +119,10 @@ def handle_streaming_event(event: dict):
         print(f"[📜 Prompt 텍스트] 노드 이름:\n{data.get('output')}", flush=True)
 
     else:
-        print(f"[📎 등록되지 않은 기타 이벤트] 이벤트 정보: {event_type} 노드 정보: {node_name}", flush=True)
+        print(
+            f"[📎 등록되지 않은 기타 이벤트] 이벤트 정보: {event_type} 노드 정보: {node_name}",
+            flush=True,
+        )
 
 
 def _sse_json(sse_data):
