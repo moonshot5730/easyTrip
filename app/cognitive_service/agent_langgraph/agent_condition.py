@@ -1,3 +1,5 @@
+from langgraph.constants import END
+
 from app.cognitive_service.agent_langgraph.agent_state import AgentState
 
 
@@ -10,5 +12,5 @@ def should_go_to_router(state: AgentState) -> str:
     ]
     # 최소 하나라도 비어 있으면 계속 대화
     if any(field is None for field in required_fields):
-        return "travel_conversation"  # 계속 대화
+        return END  # 계속 대화
     return "intent_router"  # 이제 라우터로 이동
