@@ -4,6 +4,8 @@ from pathlib import Path
 
 import requests
 
+from frontend.client_constant.trip_api_constant import START_MESSAGE
+
 # 스트림릿 스크립트 실행을 위해서 시스템 경로 root로 지정하는 코드
 root_path = str(Path(__file__).resolve().parent.parent)
 sys.path.append(root_path)
@@ -16,25 +18,24 @@ from frontend.ui_component.chat_history_ui import render_chat_history
 st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="centered")
 st.title("🔁 SSE 기반 LLM 챗봇")
 
-if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4()) # 새 사용자 세션에 고유 ID 할당
-    st.session_state.full_response_text = "" # 스트리밍 중인 전체 텍스트 버퍼
+def init_session_state():
+    if "session_id" not in st.session_state:
+        reset_session()
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "안녕하세요! 무엇을 도와드릴까요?"}
-    ]
+    if "messages" not in st.session_state:
+        st.session_state.messages = [START_MESSAGE]
 
-current_session_id = st.session_state.session_id
-st.sidebar.markdown(f"## **현재 세션 ID:** \n`{current_session_id}`")
+def reset_session():
+    st.session_state.session_id = str(uuid.uuid4())
+    st.session_state.messages = [START_MESSAGE]
+
+
+init_session_state()
+st.sidebar.markdown(f"## **현재 세션 ID:** \n`{st.session_state.session_id}`")
 
 if st.sidebar.button("새로운 대화 시작 (세션 초기화)"):
-    st.session_state.session_id = str(uuid.uuid4()) # 새 ID 할당
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "안녕하세요! 무엇을 도와드릴까요?"}
-    ]
-    st.session_state.full_response_text = ""
-    st.rerun() # 앱 다시 로드하여 새 세션 시작
+    reset_session()
+    st.rerun()
 
 # UI 렌더링
 render_chat_history(st.session_state.messages)
@@ -52,7 +53,7 @@ if prompt := st.chat_input("메시지를 입력하세요"):
         message_placeholder = st.empty()
         stream_response = ""
 
-        payload = {"messages": st.session_state["messages"], "session_id": current_session_id}
+        payload = {"messages": st.session_state["messages"], "session_id": st.session_state.session_id}
         with requests.post(
             "http://localhost:8000//trip/plan/astream-event",
             json=payload,
