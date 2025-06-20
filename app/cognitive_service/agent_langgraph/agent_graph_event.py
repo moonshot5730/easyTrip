@@ -73,7 +73,7 @@ def handle_streaming_event(event: dict):
         case ChatModelEvents.STREAM:
             chunk = data.get("chunk", {}).content
             # print(f"{chunk}", end="\n", flush=True)
-            yield f"{SSETag.DATA}{chunk}\n\n"
+            yield f"{SSETag.STREAM}{chunk}\n\n"
 
         case ChatModelEvents.END:
             print(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}", flush=True)
@@ -89,7 +89,7 @@ def handle_streaming_event(event: dict):
             print(f"🙋 대화 정보들: 현재 메시지 길이: {len(messages[0])} 정보: {messages}")
             print(f"🙋 사용자: {user_message}")
             print(f"🤖 응답: {output}", "\n")
-            yield f"{SSETag.DATA} __DONE__\n\n"
+            yield f"{SSETag.STREAM} __DONE__\n\n"
 
 
         case LLMEvents.START:

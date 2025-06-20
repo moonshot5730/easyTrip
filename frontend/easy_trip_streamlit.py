@@ -13,7 +13,7 @@ sys.path.append(root_path)
 import streamlit as st
 
 from frontend.ui_component.chat_history_ui import render_chat_history
-from shared.event_constant import DATA_TAG, END_MSG, STEP_TAG, SPLIT_PATTEN, SEARCH_TAG, SSETag
+from shared.event_constant import SPLIT_PATTEN, SSETag
 from shared.datetime_util import get_kst_timestamp_label
 from frontend.client_constant.trip_api_constant import START_MESSAGE, LANG_STATE_URL, TRAVEL_API_URL
 
@@ -130,8 +130,8 @@ if prompt := st.chat_input("메시지를 입력하세요"):
                         message_placeholder.markdown(buffer + " ")
                         break
 
-                elif event.startswith(SSETag.DATA):
-                    chunk = parsing_event(event=event, tag_name=SSETag.DATA)
+                elif event.startswith(SSETag.STREAM):
+                    chunk = parsing_event(event=event, tag_name=SSETag.STREAM)
 
                     if "__DONE__" in chunk:
                         buffer += "\n\n"

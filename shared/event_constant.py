@@ -21,7 +21,7 @@ CHAT_MODEL_STREAM = "on_chat_model_stream"
 
 class SSETag(str, Enum):
     CHAT = "chat: "
-    DATA = "data: "
+    STREAM = "stream: "
     CHAIN = "chain: "
     NODE = "node: "
     TOOL = "tool: "
