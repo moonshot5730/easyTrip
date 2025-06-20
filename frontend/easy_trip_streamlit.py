@@ -1,3 +1,4 @@
+import json
 import sys
 import uuid
 from pathlib import Path
@@ -12,7 +13,7 @@ sys.path.append(root_path)
 import streamlit as st
 
 from frontend.ui_component.chat_history_ui import render_chat_history
-from shared.event_constant import DATA_TAG, END_MSG, STEP_TAG, SPLIT_PATTEN, SEARCH_TAG
+from shared.event_constant import DATA_TAG, END_MSG, STEP_TAG, SPLIT_PATTEN, SEARCH_TAG, SSETag
 from shared.datetime_util import get_kst_timestamp_label
 from frontend.client_constant.trip_api_constant import START_MESSAGE, LANG_STATE_URL, TRAVEL_API_URL
 
@@ -86,7 +87,7 @@ with st.sidebar.expander("🕘 세션 히스토리", expanded=False):
 render_chat_history(st.session_state.messages)
 
 
-def parse_chunk(tag_name: str):
+def parsing_event(event, tag_name: str):
     return event.removeprefix(f"{tag_name}").removesuffix(f"{SPLIT_PATTEN}")
 
 
@@ -104,7 +105,7 @@ if prompt := st.chat_input("메시지를 입력하세요"):
         message_placeholder = st.empty()
         status_placeholder = st.empty()
 
-        stream_response = ""
+        buffer = ""
 
         payload = {
             "message": chat_request,
@@ -120,41 +121,69 @@ if prompt := st.chat_input("메시지를 입력하세요"):
                 if not event:
                     continue
 
-                if event.startswith(f"{STEP_TAG}"):
-                    node_name = parse_chunk(tag_name=STEP_TAG)
+                if event.startswith(SSETag.CHAT):
+                    content = parsing_event(event=event, tag_name=SSETag.CHAT)
 
-                    if node_name == END_MSG:
+                    if "__END__" in content:
                         end_chat_msg = "\n\n응답이 완료되었습니다.\n\n"
                         status_placeholder.info(f"{end_chat_msg}")
-                        message_placeholder.markdown(stream_response + " ")
+                        message_placeholder.markdown(buffer + " ")
                         break
 
-                    stream_response += f"\n\n##### 🧭 {node_name}\n\n"
-                    message_placeholder.markdown(stream_response.strip())
+                elif event.startswith(SSETag.DATA):
+                    chunk = parsing_event(event=event, tag_name=SSETag.DATA)
 
-                elif event.startswith(f"{DATA_TAG}"):
-                    node_name = parse_chunk(tag_name=DATA_TAG)
+                    if "__DONE__" in chunk:
+                        buffer += "\n\n"
+                        message_placeholder.markdown(buffer)
+                        continue
 
-                    if node_name == END_MSG:
-                        stream_response += SPLIT_PATTEN
-                        message_placeholder.markdown(stream_response)
-                        break
+                    buffer += chunk
+                    message_placeholder.markdown(buffer)
 
-                    stream_response += node_name
-                    message_placeholder.markdown(stream_response)
+                elif event.startswith(SSETag.NODE):
+                    json_str = parsing_event(event=event, tag_name=SSETag.NODE)
 
-                elif event.startswith(f"{SEARCH_TAG}"):
-                    node_name = parse_chunk(tag_name=SEARCH_TAG)
+                    try:
+                        parsed = json.loads(json_str)
+                        event_type = parsed.get("event_type", "UNKNOWN")
+                        name = parsed.get("name", "알 수 없음")
+                        status = parsed.get("status", "")
 
-                    print(node_name, end="", flush=True)
+                        # 상태 표시 (대화 상단)
+                        status_placeholder.info(f"🧠 `{name}` → {status}")
+                        message_placeholder.markdown(buffer + " ")
 
-                    stream_response += node_name
-                    message_placeholder.markdown(stream_response + " ")
-                    status_placeholder.info(f"🧠 현재 처리 노드: `{node_name}`")
+                    except json.JSONDecodeError:
+                        print("❌ JSON 파싱 오류:", json_str)
+
+                elif event.startswith(SSETag.TOOL):
+                    json_str = parsing_event(event=event, tag_name=SSETag.TOOL)
+
+                    try:
+                        parsed = json.loads(json_str)
+                        event_type = parsed.get("event_type", "UNKNOWN")
+                        name = parsed.get("name", "알 수 없음")
+                        status = parsed.get("status", "")
+
+                        # 상태 표시 (대화 상단)
+                        status_placeholder.info(f"🧠 `{name}` → {status}")
+                        message_placeholder.markdown(buffer + " ")
+
+                    except json.JSONDecodeError:
+                        print("❌ JSON 파싱 오류:", json_str)
+
+                elif event.startswith(SSETag.SEARCH):
+                    content = parsing_event(event=event, tag_name=SSETag.SEARCH)
+
+                    buffer += content
+                    status_placeholder.info(f"🧠 현재 처리 노드: `{content}`")
+                    message_placeholder.markdown(buffer + " ")
+
                 else:
-                    stream_response += event
-                    message_placeholder.markdown(stream_response + " ")
+                    buffer += event
+                    message_placeholder.markdown(buffer + " ")
 
-        st.session_state["messages"].append(
-            {"role": "assistant", "content": stream_response.strip()}
+        st.session_state.messages.append(
+            {"role": "assistant", "content": buffer.strip()}
         )
