@@ -13,7 +13,6 @@ def safe_intent_router(input: dict) -> dict:
     intent_router = (intent_prompt_template | precise_llm_nano).invoke(last_message)
 
     try:
-        # output_parser.parse expects raw LLM string output
         parsed = intent_parser.parse(intent_router.content)
         return parsed.dict()
     except Exception as e:

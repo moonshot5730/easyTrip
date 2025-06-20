@@ -55,7 +55,7 @@ if st.sidebar.button("새로운 대화 시작 (세션 초기화)"):
 
 with st.sidebar.expander("🔎 현재 LangGraph 상태"):
     # 버튼 클릭 시 API 호출
-    if st.button("📡 LangGraph 상태 새로고침"):
+    if st.button("📡 LangGraph 상태 가져오기"):
         try:
             # 예: FastAPI의 /graph-state endpoint 호출
             response = requests.get(LANG_STATE_URL, params={

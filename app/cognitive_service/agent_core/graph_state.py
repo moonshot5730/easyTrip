@@ -5,11 +5,15 @@ from langgraph.graph import add_messages
 
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
-    action: Optional[str]
-    keywords: Optional[List[str]]
 
-    want_travel_city: Optional[str]
-    travel_schedule: Optional[str]
+
+    intent: Optional[str]
+
+    travel_city: Optional[str]
     travel_style: Optional[str]
+    travel_schedule: Optional[str]
+    travel_plan: Optional[dict]
 
-    search_results: List[Dict[str, str]]
+
+    tavily_search_result: Optional[List[dict]]
+    share_url: Optional[str]

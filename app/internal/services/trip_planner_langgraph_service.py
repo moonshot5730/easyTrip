@@ -2,8 +2,8 @@ from fastapi import HTTPException
 from langchain_core.messages import HumanMessage
 from starlette.responses import JSONResponse, StreamingResponse
 
-from app.cognitive_service.agent_langgraph.agent_graph import agent_app
-from app.cognitive_service.agent_langgraph.agent_graph_event import handle_streaming_event
+from app.cognitive_service.agent_core.manage_graph import agent_app
+from app.cognitive_service.agent_core.graph_event import handle_streaming_event
 from app.schemes.agent_scheme import ChatRequest
 from shared.event_constant import STEP_TAG, END_MSG, SPLIT_PATTEN, SSETag
 
@@ -28,7 +28,7 @@ def checkpointer_config(session_id):
     return {"configurable": {"thread_id": session_id}}
 
 
-async def stream_trip_plan(chat_request: ChatRequest) -> StreamingResponse:
+async def trip_plan_agent_chat(chat_request: ChatRequest) -> StreamingResponse:
     user_message = HumanMessage(**chat_request["message"])
 
     streaming_events = agent_app.astream_events(

@@ -3,7 +3,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END
 from langgraph.graph import StateGraph
 
-from app.cognitive_service.agent_langgraph.agent_state import AgentState
+from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_prompt.intent_prompt_parser import \
     travel_conversation
 

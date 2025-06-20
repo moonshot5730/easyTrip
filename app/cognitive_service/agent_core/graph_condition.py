@@ -1,6 +1,6 @@
 from langgraph.constants import END
 
-from app.cognitive_service.agent_langgraph.agent_state import AgentState
+from app.cognitive_service.agent_core.graph_state import AgentState
 
 
 def should_go_to_router(state: AgentState) -> str:

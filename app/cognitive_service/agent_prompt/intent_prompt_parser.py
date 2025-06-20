@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableMap
 from pydantic import BaseModel
 
-from app.cognitive_service.agent_langgraph.agent_state import AgentState
+from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_llm.llm_models import creative_openai_mini
 
 
