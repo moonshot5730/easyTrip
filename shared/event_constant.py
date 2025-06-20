@@ -1,3 +1,5 @@
+from enum import Enum
+
 SPLIT_PATTEN = "\n\n"
 END_MSG = "[DONE]"
 
@@ -15,3 +17,15 @@ PROMPT_END = "on_prompt_end"
 
 CHAT_MODEL_START = "on_chat_model_start"
 CHAT_MODEL_STREAM = "on_chat_model_stream"
+
+
+class SSETag(str, Enum):
+    CHAT = "chat: "
+    DATA = "data: "
+    CHAIN = "chain: "
+    NODE = "node: "
+    TOOL = "tool: "
+    SEARCH = "search: "
+
+    def __str__(self):
+        return self.value
