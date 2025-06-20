@@ -1,7 +1,9 @@
 SPLIT_PATTEN = "\n\n"
 END_MSG = "[DONE]"
-DATA_TAG = "data:"
-STEP_TAG = "step:"
+
+DATA_TAG = "data: "
+STEP_TAG = "step: "
+SEARCH_TAG = "search: "
 
 
 CHAIN_START = "on_chain_start"
