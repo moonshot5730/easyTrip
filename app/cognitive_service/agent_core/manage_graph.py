@@ -1,14 +1,17 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END
 from langgraph.graph import StateGraph
+from langgraph.prebuilt import ToolNode
 
 from app.cognitive_service.agent.travel_conversation_agent import travel_conversation
 from app.cognitive_service.agent.travel_place_agent import travel_place_conversation
+from app.cognitive_service.agent.travel_search_agent import travel_search_conversation
 from app.cognitive_service.agent_core.graph_condition import state_router
 
 from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_parser.extract_travel_place_parser import extract_travel_place_llm_parser
 from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
+from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool
 
 
 def create_graph():
@@ -33,12 +36,12 @@ def create_korea_easy_trip_graph():
     # ✅ 시작 라우터
     graph.add_node("state_router", state_router)
 
+    # 도구 노드 등록
+    tavily_search_tool_node = ToolNode(tools=[place_search_tool])
+
     # 노드 등록
     graph.add_node("travel_place_conversation", travel_place_conversation)
-    graph.add_node("travel_search", travel_conversation)
-    # graph.add_node("travel_schedule_conversation", travel_conversation)
-    # graph.add_node("travel_plan_conversation", travel_conversation)
-    # graph.add_node("travel_plan_share", travel_conversation)
+    graph.add_node("travel_search_conversation", travel_search_conversation)
 
     graph.add_node("extract_travel_place_llm_parser", extract_travel_place_llm_parser)
 
@@ -51,7 +54,7 @@ def create_korea_easy_trip_graph():
         path=lambda x: x["next_node"],
         path_map={
             "travel_place_conversation": "travel_place_conversation",
-            "travel_search": END,
+            "travel_search_conversation": "travel_search_conversation",
             "travel_schedule_conversation": END,
             "travel_plan_conversation": END,
             "travel_plan_share": END,
@@ -62,3 +65,7 @@ def create_korea_easy_trip_graph():
     return graph.compile(checkpointer=checkpointer)
 
 agent_app = create_korea_easy_trip_graph()
+
+
+if __name__ == '__main__':
+    print(agent_app.get_graph().draw_mermaid())

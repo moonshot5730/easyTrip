@@ -3,6 +3,7 @@ from typing import Literal
 from langgraph.constants import END
 
 from app.cognitive_service.agent_core.graph_state import AgentState
+from app.core.logger.logger_config import api_logger
 
 
 def lang_condition(branch: str) -> dict:
@@ -68,7 +69,7 @@ def state_router(state: AgentState) -> dict:
     def is_blank(value):
         return value in (None, "", "미정")
 
-    print(f" 현재 state 정보 : {state}")
+    api_logger.info(f" 현재 state 정보 : {state}")
     updated_state = state.copy()
 
     travel_place = state.get("travel_place")
@@ -77,8 +78,8 @@ def state_router(state: AgentState) -> dict:
     need_place_search = state.get("need_place_search", False)
 
     match (is_blank(travel_place), need_place_search, is_blank(travel_schedule), is_blank(travel_plan)):
-        case (True, True, _, _):
-            next_node = "travel_search"
+        case (_, True, _, _):
+            next_node = "travel_search_conversation"
         case (True, False, _, _):
             next_node = "travel_place_conversation"
         case (False, _, True, False):
@@ -93,6 +94,6 @@ def state_router(state: AgentState) -> dict:
     updated_state["next_node"] = next_node
     updated_state["messages"] = state["messages"]
 
-    print(f" supervisor_router 반환 정보: {next_node}")
-    print(f" 갱신된 state 정보 : {updated_state}")
+    api_logger.info(f" supervisor_router 반환 정보: {next_node}")
+    api_logger.info(f" 갱신된 state 정보 : {updated_state}")
     return updated_state

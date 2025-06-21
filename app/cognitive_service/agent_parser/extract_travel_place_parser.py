@@ -12,7 +12,7 @@ from app.core.logger.logger_config import api_logger
 
 class TravelPlaceOutput(BaseModel):
     travel_city: Optional[str] = Field(default="미정")
-    travel_place: Optional[List[str]] = Field(default="미정")
+    travel_place: Optional[List[str]] = Field(default=["미정"])
     need_place_search: Optional[bool] = Field(default="False")
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)

@@ -2,7 +2,8 @@ import json
 import textwrap
 from dataclasses import dataclass
 
-from shared.event_constant import SSETag
+from app.cognitive_service.agent_tool.travel_search_tool import parse_tavily_results_markdown
+from shared.event_constant import SSETag, DATA_TAG, SPLIT_PATTEN
 
 
 @dataclass(frozen=True)
@@ -73,7 +74,7 @@ def handle_streaming_event(event: dict):
         case ChatModelEvents.STREAM:
             chunk = data.get("chunk", {}).content
             # print(f"{chunk}", end="\n", flush=True)
-            yield f"{SSETag.STREAM}{chunk}\n\n"
+            yield f"{SSETag.STREAM}{chunk}{SPLIT_PATTEN}"
 
         case ChatModelEvents.END:
             print(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}", flush=True)
@@ -113,7 +114,13 @@ def handle_streaming_event(event: dict):
             tool_output = data.get('output')
             print(f"[🔧 툴 종료] 노드 이름: {node_name} → 결과 정보:: {tool_output}", flush=True)
             # yield format_sse_event_state(tag_name=SSE_NODE_TAG, event_type=ToolEvents.END, name=tool_name, status="완료")
-            yield format_sse_event_state_json(tag_name=SSETag.TOOL, event_type=ToolEvents.END, name=tool_output, status="완료")
+
+
+            if node_name == "tavily_web_search":
+                parsed_markdown_search_result = parse_tavily_results_markdown(tool_output)
+                yield f"{SSETag.STREAM}{parsed_markdown_search_result}{SPLIT_PATTEN}"
+            else:
+                yield format_sse_event_state_json(tag_name=SSETag.TOOL, event_type=ToolEvents.END, name=tool_output, status="완료")
 
 
         case RetrieverEvents.START:

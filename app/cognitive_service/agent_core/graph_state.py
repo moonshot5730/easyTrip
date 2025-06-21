@@ -12,7 +12,7 @@ class AgentState(TypedDict):
     intent: Literal["tavel_conversation", "search"]
 
     travel_city: Optional[str]
-    travel_place: Optional[str]
+    travel_place: Optional[List[str]]
     travel_schedule: Optional[str]
     travel_style: Optional[str]
     need_place_search: Optional[bool]

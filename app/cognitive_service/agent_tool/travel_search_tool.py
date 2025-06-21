@@ -1,21 +1,34 @@
-from langchain_core.tools import tool
+import os
+from pprint import pprint
+
+from langchain_tavily import TavilySearch
+
+os.environ["TAVILY_API_KEY"] = "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"
+
+place_search_tool = TavilySearch(
+    name="tavily_web_search", # 툴 이름
+    max_results=3,
+    topic="general",
+)
 
 
-@tool
-def search_place_tool(user_query: str) -> dict:
-    """
-    사용자의 요청에 따라 추천 여행지를 반환합니다.
-    실제 구현에서는 외부 API나 벡터 검색을 연동할 수 있습니다.
-    """
-    # 여기는 하드코딩 예시 — 실제로는 LLM, 검색 API, 벡터 DB 등을 연동 가능
-    recommendations = [
-        "강릉 – 해변과 커피거리로 유명한 동해안 도시",
-        "부산 – 바다와 도시가 함께 있는 대표 여행지",
-        "전주 – 한옥마을과 맛집으로 유명한 문화 여행지",
-        "제주 – 자연, 바다, 맛집이 있는 섬 여행지"
-    ]
+def parse_tavily_results_markdown(tool_result: dict) -> str:
+    if not tool_result or "results" not in tool_result:
+        return "🔍 검색 결과가 없습니다."
 
-    return {
-        "search_results": recommendations,
-        "message": "추천 여행지를 몇 가지 찾아드렸어요! 관심 가는 곳이 있으신가요?"
-    }
+    result_lines = [f"## {tool_result["query"]} Tavily 검색 결과입니다."]
+    for idx, item in enumerate(tool_result["results"], start=1):
+
+        title = item.get("title", "제목 없음")
+        url = item.get("url", "#")
+        summary = item.get("content", "")
+        result_lines.append(f"**{idx}. [{title}]({url})**\n\n-요약 정보: {summary.strip()}\n")
+
+    return "\n---\n".join(result_lines)
+
+if __name__ == '__main__':
+    query = "시원한 여름 휴가 및 대한민국 여행지"
+
+    # Tavily 웹 검색
+    response = place_search_tool.invoke(input=query)
+    pprint(response)
