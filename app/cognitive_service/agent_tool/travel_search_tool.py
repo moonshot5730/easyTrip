@@ -16,7 +16,7 @@ def parse_tavily_results_markdown(tool_result: dict) -> str:
     if not tool_result or "results" not in tool_result:
         return "🔍 검색 결과가 없습니다."
 
-    result_lines = [f"## {tool_result["query"]} Tavily 검색 결과입니다."]
+    result_lines = [f"#### '{tool_result["query"]}' 키워드 검색 결과"]
     for idx, item in enumerate(tool_result["results"], start=1):
 
         title = item.get("title", "제목 없음")
@@ -25,6 +25,17 @@ def parse_tavily_results_markdown(tool_result: dict) -> str:
         result_lines.append(f"**{idx}. [{title}]({url})**\n\n-요약 정보: {summary.strip()}\n")
 
     return "\n---\n".join(result_lines)
+
+def parse_tavily_results(tool_result: dict) -> str:
+    if not tool_result or "results" not in tool_result:
+        return "검색 결과가 없습니다."
+
+    result_lines = []
+    for idx, item in enumerate(tool_result["results"], start=1):
+        summary = item.get("content", "")
+        result_lines.append(f"**{idx}.-요약 정보: {summary.strip()}\n")
+
+    return result_lines
 
 if __name__ == '__main__':
     query = "시원한 여름 휴가 및 대한민국 여행지"
