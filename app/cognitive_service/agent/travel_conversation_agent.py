@@ -8,7 +8,7 @@ from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode
 
 from app.cognitive_service.agent_core.graph_state import AgentState
-from app.cognitive_service.agent_parser.llm_json_parser import extract_info_llm_parser
+from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
 from app.cognitive_service.agent_tool.extract_json_tool import extract_travel_info
 from app.cognitive_service.agent_tool.travel_search_tool import search_place_tool
 from app.external.openai.openai_client import precise_llm_nano, creative_llm_nano
