@@ -33,7 +33,8 @@ async def trip_plan_agent_chat(chat_request: ChatRequest) -> StreamingResponse:
     user_message = HumanMessage(**chat_request["message"])
 
     streaming_events = agent_app.astream_events(
-        input={"messages": [user_message]},
+        # input={"messages": [user_message]},
+        input={"user_query": user_message.content},
         version="v2",
         stream_mode=["updates"],
         config=checkpointer_config(chat_request["session_id"]),

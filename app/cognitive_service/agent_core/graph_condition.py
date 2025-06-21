@@ -91,6 +91,8 @@ def state_router(state: AgentState) -> dict:
             next_node = "travel_place_conversation"
 
     updated_state["next_node"] = next_node
+    updated_state["messages"] = state["messages"]
+
     print(f" supervisor_router 반환 정보: {next_node}")
     print(f" 갱신된 state 정보 : {updated_state}")
     return updated_state

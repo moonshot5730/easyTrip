@@ -87,8 +87,8 @@ def handle_streaming_event(event: dict):
 
             print("\n", f"[💬 대화 요약]")
             print(f"🙋 대화 정보들: 현재 메시지 길이: {len(messages[0])} 정보: {messages}")
-            print(f"🙋 사용자: {user_message}")
-            print(f"🤖 응답: {output}", "\n")
+            print(f"🙋 대화: {user_message}")
+            print(f"🤖 최종 결과: {output}", "\n")
             yield f"{SSETag.STREAM} __DONE__\n\n"
 
 

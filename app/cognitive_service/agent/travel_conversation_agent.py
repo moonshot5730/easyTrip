@@ -3,13 +3,13 @@ import textwrap
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
+from app.cognitive_service.agent_core.graph_state import AgentState, get_last_message
 from app.external.openai.openai_client import creative_llm_nano
 from shared.datetime_util import get_kst_year_month_date_label
 
 
 def travel_conversation(state: AgentState):
-    user_query = get_last_human_message(messages=state["messages"])
+    user_query = get_last_message(messages=state["messages"])
 
     travel_conversation_prompt = PromptTemplate.from_template(textwrap.dedent("""
     너는 {user_name}과의 대화를 통해 여행 스타일, 일정, 장소를 분석해주는 대한민국 개인 여행 플래너 KET야.

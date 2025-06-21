@@ -29,7 +29,10 @@ travel_place_system_prompt_template = textwrap.dedent("""
 
 
 def travel_place_conversation(state: AgentState):
-    user_query = get_last_message(messages=state["messages"])
+    print(f"[travel_place_conversation!!!] 현재 상태 정보이니다: {state.get("messages", [])}")
+
+    user_query = state.get("user_query") or get_last_message(messages=state.get("messages", []))
+    new_user_message = HumanMessage(content=user_query)
 
     system_message = SystemMessage(
         content=PromptTemplate.from_template(travel_place_system_prompt_template).format(
@@ -38,9 +41,10 @@ def travel_place_conversation(state: AgentState):
         )
     )
 
-    messages = [system_message, HumanMessage(content=user_query)]
+    recent_messages =state.get("messages", [])[-4:]
+    messages = [system_message] + recent_messages + [new_user_message]
     llm_response = creative_llm_nano.invoke(messages)
 
     return {
-        "messages": state["messages"] + [AIMessage(content=llm_response.content)]
+        "messages": state.get("messages", []) + [new_user_message, AIMessage(content=llm_response.content)]
     }
