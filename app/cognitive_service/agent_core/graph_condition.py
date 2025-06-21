@@ -14,3 +14,5 @@ def should_go_to_router(state: AgentState) -> str:
     if any(field is None for field in required_fields):
         return END  # 계속 대화
     return "intent_router"  # 이제 라우터로 이동
+
+
