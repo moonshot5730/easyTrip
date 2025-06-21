@@ -64,39 +64,33 @@ def supervisor_router_str(state: AgentState) -> Literal["conversation", "search"
     return result
 
 
-def supervisor_router(state: AgentState) -> dict:
-    """
-    체크포인트로 저장된 state 정보를 보고 분기:
-    - travel_place, travel_schedule, travel_style이 모두 비어 있고 검색 요청도 없는 경우 → 대화 시작 및 여행 안내(loop)
-    - style/schedule은 채워졌고,
-        - 장소가 비어 있고 검색 요청 있음 → search
-        - 장소까지 있으면 → complete [여행 계획 세워주기]
-        - 장소가 없고 검색 요청도 없음 → loop
-    - 그 외 → complete [대화 끝]
-    """
+def state_router(state: AgentState) -> dict:
     def is_blank(value):
         return value in (None, "", "미정")
 
     print(f" 현재 state 정보 : {state}")
+    updated_state = state.copy()
 
     travel_place = state.get("travel_place")
     travel_schedule = state.get("travel_schedule")
-    travel_style = state.get("travel_style")
-    need_place_search = state.get("need_place_search")
+    travel_plan = state.get("travel_plan")
+    need_place_search = state.get("need_place_search", False)
 
-    updated_state = state.copy()
+    match (is_blank(travel_place), need_place_search, is_blank(travel_schedule), is_blank(travel_plan)):
+        case (True, True, _, _):
+            next_node = "travel_search"
+        case (True, False, _, _):
+            next_node = "travel_place_conversation"
+        case (False, _, True, False):
+            next_node = "travel_schedule_conversation"
+        case (False, _, False, True):
+            next_node = "travel_plan_conversation"
+        case (False, _, False, False):
+            next_node = "travel_plan_share"
+        case _:
+            next_node = "travel_place_conversation"
 
-    updated_state["flow_path"] = "conversation"
-    if all(map(is_blank, [travel_place, travel_schedule, travel_style])) and need_place_search is False:
-        updated_state["flow_path"] = "conversation"
-
-    if not is_blank(travel_schedule) and not is_blank(travel_style):
-        if is_blank(travel_place):
-            updated_state["flow_path"] = "search" if need_place_search else "conversation"
-        else:
-            updated_state["flow_path"] = "conversation"
-
-    print(f" supervisor_router 반환 정보: {updated_state["flow_path"]}")
+    updated_state["next_node"] = next_node
+    print(f" supervisor_router 반환 정보: {next_node}")
     print(f" 갱신된 state 정보 : {updated_state}")
-
     return updated_state
