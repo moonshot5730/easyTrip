@@ -74,7 +74,7 @@ def travel_place_conversation(state: AgentState):
         content=PromptTemplate.from_template(
             travel_place_system_prompt_template
         ).format(
-            user_name="문현준",
+            user_name=state.get("user_name", "사용자"),
             today=get_kst_year_month_date_label(),
             travel_city=state.get("travel_city", "미정"),
             travel_place=state.get("travel_place", "미정"),
@@ -84,7 +84,7 @@ def travel_place_conversation(state: AgentState):
         )
     )
 
-    recent_messages = get_recent_context(state.get("messages", []))
+    recent_messages = get_recent_context(state.get("messages", []), limit=4)
     messages = [system_message] + recent_messages + [new_user_message]
     llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(messages)
 

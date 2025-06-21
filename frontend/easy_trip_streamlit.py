@@ -18,9 +18,9 @@ from frontend.ui_component.chat_history_ui import render_chat_history
 from shared.datetime_util import get_kst_timestamp_label
 from shared.event_constant import SPLIT_PATTEN, SSETag
 
-st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="wide")
-st.title("🔁 SSE 기반 LLM 챗봇")
 
+st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="wide")
+st.title(f"대한민국 여행 계획 에이전트 KET")
 
 def init_session_state():
     if "session_history" not in st.session_state:
@@ -44,12 +44,24 @@ def reset_session():
 
 
 init_session_state()
+
+with st.sidebar.expander("🙋 사용자 정보", expanded=True):
+    user_name = st.text_input("이름을 입력하세요", placeholder="예: 문현준")
+
+    if not user_name:
+        st.write("이름을 입력해 주세요.")
+    else:
+        st.session_state["user_name"] = user_name
+        st.markdown(f"**✅ 입력된 이름:** `{user_name}`")
+        st.rerun()
+
+
 current_session_id = st.session_state.session_id
+
 st.sidebar.markdown(f"## **현재 세션 ID:** \n`{current_session_id}`")
 
 if st.sidebar.button("새로운 대화 시작 (세션 초기화)"):
     reset_session()
-
 
 with st.sidebar.expander("🔎 현재 LangGraph 상태"):
     # 버튼 클릭 시 API 호출
@@ -86,6 +98,7 @@ with st.sidebar.expander("🕘 세션 히스토리", expanded=False):
                 f"**{i}. {entry["timestamp"]}. 세션 ID:** `{entry['session_id']}`"
             )
 
+
 # UI 렌더링
 render_chat_history(st.session_state.messages)
 
@@ -113,6 +126,7 @@ if prompt := st.chat_input("메시지를 입력하세요"):
         payload = {
             "message": chat_request,
             "session_id": current_session_id,
+            "user_name": st.session_state.user_name,
         }
         with requests.post(
             TRAVEL_API_URL,

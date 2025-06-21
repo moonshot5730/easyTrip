@@ -40,7 +40,7 @@ def travel_conversation(state: AgentState):
     
     사용자 메시지: {user_query}"""
         )
-    ).partial(user_name="문현준", today=get_kst_year_month_date_label())
+    ).partial(user_name=state.get("user_name", "사용자"), today=get_kst_year_month_date_label())
 
     formatted_prompt = travel_conversation_prompt.format(
         travel_place=state.get("travel_place", "미정"),

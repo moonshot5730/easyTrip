@@ -3,11 +3,10 @@ import textwrap
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_last_message)
+from app.cognitive_service.agent_core.graph_state import (AgentState)
 from app.cognitive_service.agent_llm.llm_models import (precise_llm_nano)
 from app.cognitive_service.agent_tool.travel_search_tool import (
-    parse_tavily_results, place_search_tool)
+    place_search_tool)
 from app.core.logger.logger_config import api_logger
 from shared.datetime_util import get_kst_year_month_date_label
 
@@ -31,23 +30,19 @@ travel_search_summary_system_prompt_template = textwrap.dedent(
 def travel_search_summary_conversation(state: AgentState):
     """
     검색된 결과를 기반으로 마크다운 요약 응답을 내려줍니다.
-    :param state:
-    :return:
+    :param state: 그래프 스테이트 정보
+    :return: 검색 결과를 요약해서 내려줍니다. [이벤트에서 처리]
     """
     api_logger.info(
         f"[travel_search_summary_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
     )
 
-    search_results = state.get("websearch_results", [])
-
     system_message = SystemMessage(
         content=PromptTemplate.from_template(
             travel_search_summary_system_prompt_template
-        ).format(search_results=search_results, today=get_kst_year_month_date_label())
+        ).format(search_results=state.get("websearch_results", []), today=get_kst_year_month_date_label())
     )
-    messages = [system_message]
-    llm_response = precise_llm_nano.invoke(messages)
-
+    llm_response = precise_llm_nano.invoke([system_message])
 
     return {
         "messages": state.get("messages", []) + [AIMessage(content=llm_response.content)],
