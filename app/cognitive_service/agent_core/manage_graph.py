@@ -2,9 +2,11 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END
 from langgraph.graph import StateGraph
 
+from app.cognitive_service.agent.travel_conversation_agent import travel_conversation
+from app.cognitive_service.agent_core.graph_condition import supervisor_router
+
 from app.cognitive_service.agent_core.graph_state import AgentState
-from app.cognitive_service.agent_parser.intent_prompt_parser import \
-    travel_conversation
+from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
 
 
 def create_graph():
@@ -20,10 +22,37 @@ def create_graph():
 
     # 인메모리 체크포인터 등록
     checkpointer = MemorySaver()
-
     return graph_builder.compile(checkpointer=checkpointer)
 
 
-agent_app = create_graph()
+# agent_app = create_graph()
 
-print(agent_app.get_graph().draw_mermaid())
+
+def create_korea_easy_trip_graph():
+    graph = StateGraph(AgentState)
+
+    # ✅ 시작 라우터
+    graph.add_node("supervisor_router", supervisor_router)
+
+    # 노드 등록
+    graph.add_node("travel_conversation", travel_conversation)
+    graph.add_node("extract_info_llm_parser", extract_info_llm_parser)
+
+    # 시작 지점
+    graph.set_entry_point("supervisor_router")
+
+    # 시작 분기
+    graph.add_conditional_edges(
+        "supervisor_router",
+        path=lambda x: x["flow_path"],
+        path_map={
+            "conversation": "travel_conversation",
+            "search": END,
+            "complete": END
+        }
+    )
+    graph.add_edge("travel_conversation", "extract_info_llm_parser")
+    checkpointer = MemorySaver()
+    return graph.compile(checkpointer=checkpointer)
+
+agent_app = create_korea_easy_trip_graph()

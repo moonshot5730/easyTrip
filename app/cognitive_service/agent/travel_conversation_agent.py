@@ -1,26 +1,14 @@
 import textwrap
-from pprint import pprint
 
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage
 from langchain_core.prompts import PromptTemplate
-from langgraph.constants import END
-from langgraph.graph import StateGraph
-from langgraph.prebuilt import ToolNode
 
-from app.cognitive_service.agent_core.graph_condition import should_conversation, lang_condition, \
-    supervisor_router
 from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
-from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
-from app.cognitive_service.agent_tool.extract_json_tool import extract_travel_info
-from app.cognitive_service.agent_tool.travel_search_tool import search_place_tool
 from app.external.openai.openai_client import creative_llm_nano
 from shared.datetime_util import get_kst_year_month_date_label
 
 
 def travel_conversation(state: AgentState):
-    print(f"[travel_conversation 시작!!] state 정보: {state}")
-    print(f" 현재 state 정보 : {state}")
-
     user_query = get_last_human_message(messages=state["messages"])
 
     travel_conversation_prompt = PromptTemplate.from_template(textwrap.dedent("""
@@ -62,53 +50,8 @@ def travel_conversation(state: AgentState):
     print(f"🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}")
     return {
         "messages": [AIMessage(content=llm_response.content)],
-        "travel_conversation_raw_output": llm_response
+        "travel_conversation_raw_output": llm_response.content
     }
-
-def create_korea_easy_trip_graph():
-    graph = StateGraph(AgentState)
-
-    # ✅ 시작 라우터
-    graph.add_node("supervisor_router", supervisor_router)
-
-    # 노드 등록
-    graph.add_node("travel_conversation", travel_conversation)
-    graph.add_node("extract_info_llm_parser", extract_info_llm_parser)
-
-    # 시작 지점
-    graph.set_entry_point("supervisor_router")
-
-    # 시작 분기
-    graph.add_conditional_edges(
-        "supervisor_router",
-        path=lambda x: x["flow_path"],
-        path_map={
-            "conversation": "travel_conversation",
-            "search": END,
-            "complete": END
-        }
-    )
-    graph.add_edge("travel_conversation", "extract_info_llm_parser")
-
-
-    return graph.compile()
-
-
-
-# 단일 테스트용
-if __name__ == '__main__':
-    travel_conversation_graph = create_korea_easy_trip_graph()
-    print(travel_conversation_graph.get_graph().draw_mermaid())
-
-
-    start_message = {
-        "messages": [
-            HumanMessage(content="여행을 가고 싶은데 어디가 좋을까요? 7월 12일 ~ 15일 계획하고 있어 먹방이랑 자연 문화를 즐기는 것을 선호해.")
-        ]
-    }
-
-    result = travel_conversation_graph.invoke(start_message)
-    pprint(result)
 
 
 

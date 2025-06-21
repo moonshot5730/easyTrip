@@ -1,11 +1,13 @@
 from fastapi import HTTPException
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, BaseMessage
 from starlette.responses import JSONResponse, StreamingResponse
 
 from app.cognitive_service.agent_core.manage_graph import agent_app
 from app.cognitive_service.agent_core.graph_event import handle_streaming_event
+from app.core.logger.logger_config import api_logger
 from app.schemes.agent_scheme import ChatRequest
 from shared.event_constant import STEP_TAG, END_MSG, SPLIT_PATTEN, SSETag
+
 
 
 def fetch_graph_state_by_session(session_id: str) -> JSONResponse:
@@ -15,10 +17,9 @@ def fetch_graph_state_by_session(session_id: str) -> JSONResponse:
 
     values = state.values.copy()
 
-    # ✅ messages 처리: content만 추출
     messages = values.get("messages", [])
     values["messages"] = [
-        getattr(m, "content", str(m)) for m in messages
+        m.content if isinstance(m, BaseMessage) else str(m) for m in messages
     ]
 
     return JSONResponse(content=values)
