@@ -7,12 +7,13 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode
 
+from app.cognitive_service.agent_core.graph_condition import should_conversation
 from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
 from app.cognitive_service.agent_tool.extract_json_tool import extract_travel_info
 from app.cognitive_service.agent_tool.travel_search_tool import search_place_tool
-from app.external.openai.openai_client import precise_llm_nano, creative_llm_nano
-from shared.datetime_util import get_kst_timestamp_label, get_kst_year_month_date_label
+from app.external.openai.openai_client import creative_llm_nano
+from shared.datetime_util import get_kst_year_month_date_label
 
 
 def travel_conversation(state: AgentState):
@@ -60,24 +61,6 @@ def travel_conversation(state: AgentState):
         "travel_conversation_raw_output": llm_response
     }
 
-
-def should_conversation(state: AgentState) -> str:
-    extract_travel_info = all([
-        state.get("travel_schedule") not in [None, "", "미정"],
-        state.get("travel_style") not in [None, "", "미정"]
-    ])
-
-    if extract_travel_info:
-        if state.get("travel_place") not in [None, "", "미정"]:
-            return "complete"
-        elif state.get("need_place_search") is True:
-            return "search"
-        else:
-            return "loop"
-
-    return "complete"
-
-
 def create_graph():
     graph = StateGraph(AgentState)
 
@@ -113,18 +96,21 @@ def create_graph():
     return graph.compile()
 
 
-travel_conversation_graph = create_graph()
-print(travel_conversation_graph.get_graph().draw_mermaid())
+
+# 단일 테스트용
+if __name__ == '__main__':
+    travel_conversation_graph = create_graph()
+    print(travel_conversation_graph.get_graph().draw_mermaid())
 
 
-start_message = {
-    "messages": [
-        HumanMessage(content="여행을 가고 싶은데 어디가 좋을까요?")
-    ]
-}
+    start_message = {
+        "messages": [
+            HumanMessage(content="여행을 가고 싶은데 어디가 좋을까요? 7월 12일 ~ 15일 계획하고 있어 먹방이랑 자연 문화를 즐기는 것을 선호해.")
+        ]
+    }
 
-result = travel_conversation_graph.invoke(start_message)
-pprint(result)
+    result = travel_conversation_graph.invoke(start_message)
+    pprint(result)
 
 
 
