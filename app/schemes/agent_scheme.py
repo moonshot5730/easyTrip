@@ -8,4 +8,5 @@ class ChatMessage(TypedDict):
 
 class ChatRequest(TypedDict):
     session_id: str
+    user_name: str
     message: ChatMessage

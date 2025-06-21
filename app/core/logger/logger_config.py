@@ -29,4 +29,5 @@ def get_logger(log_file: str = LOG_FILE) -> logging.Logger:
 
     return logger
 
+
 api_logger = get_logger()
