@@ -1,5 +1,6 @@
 from typing import Annotated, Dict, List, Optional, TypedDict, Literal
 
+from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph import add_messages
 
 
@@ -22,3 +23,17 @@ class AgentState(TypedDict):
     tavily_search_result: Optional[List[dict]]
     share_url: Optional[str]
 
+
+def get_latest_messages(messages):
+    latest_ai = ""
+    latest_human = ""
+
+    for message in reversed(messages):
+        if not latest_ai and isinstance(message, AIMessage):
+            latest_ai = message.content
+        elif not latest_human and isinstance(message, HumanMessage):
+            latest_human = message.content
+        if latest_ai and latest_human:
+            break
+
+    return latest_ai, latest_human

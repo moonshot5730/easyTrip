@@ -1,7 +1,7 @@
 from langchain_core.runnables import RunnableLambda
 
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
-from app.cognitive_service.agent_prompt.intent_prompt_parser import (
+from app.cognitive_service.agent_parser.intent_prompt_parser import (
     intent_parser, intent_prompt_template)
 from app.core.logger.logger_config import get_logger
 
