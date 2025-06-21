@@ -7,7 +7,6 @@ from langgraph.graph import add_messages
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
-
     intent: Literal["tavel_conversation", "search"]
 
     travel_place: Optional[str]
