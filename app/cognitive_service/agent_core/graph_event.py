@@ -103,12 +103,12 @@ def handle_streaming_event(event: dict):
             else:
                 user_message = "[메시지 없음]"
 
-            api_logger.info("\n", f"[💬 대화 요약]")
+            api_logger.info(f"[💬 대화 요약]")
             api_logger.info(
                 f"🙋 대화 정보들: 현재 메시지 길이: {len(messages[0])} 정보: {messages}"
             )
             api_logger.info(f"🙋 대화: {user_message}")
-            api_logger.info(f"🤖 최종 결과: {output}", "\n")
+            api_logger.info(f"🤖 최종 결과: {output}\n")
             yield f"{SSETag.STREAM} __DONE__\n\n"
 
         case LLMEvents.START:

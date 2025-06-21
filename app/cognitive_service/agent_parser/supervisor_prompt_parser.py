@@ -5,8 +5,7 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel
 
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
-from shared.datetime_util import (get_kst_timestamp_label,
-                                  get_kst_year_month_date_label)
+from shared.datetime_util import (get_kst_year_month_date_label)
 
 
 class SupervisorOutput(BaseModel):

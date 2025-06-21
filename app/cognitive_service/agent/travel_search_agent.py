@@ -5,13 +5,10 @@ from langchain_core.prompts import PromptTemplate
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_last_message)
-from app.cognitive_service.agent_llm.llm_models import (creative_llm_nano,
-                                                        precise_llm_mini,
-                                                        precise_llm_nano)
+from app.cognitive_service.agent_llm.llm_models import (precise_llm_nano)
 from app.cognitive_service.agent_tool.travel_search_tool import (
     parse_tavily_results, place_search_tool)
 from app.core.logger.logger_config import api_logger
-from shared.datetime_util import get_kst_year_month_date_label
 
 travel_search_system_prompt_template = textwrap.dedent(
     """

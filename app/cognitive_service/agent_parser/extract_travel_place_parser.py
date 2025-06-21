@@ -15,18 +15,24 @@ from shared.format_util import format_user_messages_with_index
 class TravelPlaceOutput(BaseModel):
     travel_city: Optional[str] = Field(default="미정")
     travel_place: Optional[List[str]] = Field(default=["미정"])
+    travel_schedule: Optional[str] = Field(default=["미정"])
+    travel_style: Optional[str] = Field(default=["미정"])
+    travel_theme: Optional[str] = Field(default=["미정"])
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
 extract_travel_info_prompt = PromptTemplate.from_template(
     textwrap.dedent(
         """
-        당신은 사용자의 최근 대화를 분석해서 여행을 위한 주요 정보를 추출하는 개체 추출기 KET야.
-        KET는 최근 사용자의 요청 메시지 목록을 분석해서 사용자가 선호하는 여행 지역, 여행 장소 개체 정보를 추출해.
+        당신은 사용자의 최근 응답들을 분석해서 여행지 추천 및 제안을 위해 사용자의 여행 정보를 분석 및 추출하는 개체 추출기 KET야.
+        KET는 최근 사용자의 대화 메시지 목록을 분석해서 사용자가 선호하는 여행 지역, 여행 장소, 여행 스타일, 여행 테마, 여행 일정 개체 정보를 추출해.
         
         KET가 추출할 개체 정보야:
         - travel_city: 여행 지역 및 도시
         - travel_place: 세부 여행 장소 목록
+        - travel_schedule: 계획중인 여행 일정 (YYYY-MM-DD~YYYY-MM-DD)
+        - travel_style: 여행 계획 스타일 (즉흥, 계획, 상관없음 등등)
+        - travel_theme: 계획중인 여행 테마 (자연, 힐링, 휴식, 놀거리 등등)
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다.
         
         응답 JSON 형식:
@@ -38,7 +44,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
 
 def extract_travel_place_llm_parser(state: AgentState):
     messages = state.get("messages", [])
-    recent_human_messages = get_recent_human_messages(messages)
+    recent_human_messages = get_recent_human_messages(messages, limit=10)
 
     formatted_prompt = extract_travel_info_prompt.format(
         user_query=format_user_messages_with_index(recent_human_messages)
@@ -55,4 +61,7 @@ def extract_travel_place_llm_parser(state: AgentState):
     return {
         "travel_city": travel_place_info.travel_city,
         "travel_place": travel_place_info.travel_place,
+        "travel_schedule": travel_place_info.travel_schedule,
+        "travel_style": travel_place_info.travel_style,
+        "travel_theme": travel_place_info.travel_theme,
     }

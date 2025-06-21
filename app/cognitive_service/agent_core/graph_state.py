@@ -15,6 +15,7 @@ class AgentState(TypedDict):
     travel_place: Optional[List[str]]
     travel_schedule: Optional[str]
     travel_style: Optional[str]
+    travel_theme: Optional[str]
 
     travel_plan: Optional[dict]
     share_url: Optional[str]
