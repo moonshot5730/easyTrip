@@ -41,9 +41,6 @@ def create_korea_easy_trip_graph():
     # ✅ 시작 라우터
     graph.add_node("state_router", state_router)
 
-    # 도구 노드 등록
-    tavily_search_tool_node = ToolNode(tools=[place_search_tool])
-
     # 노드 등록
     graph.add_node("travel_place_conversation", travel_place_conversation)
     graph.add_node("travel_search_conversation", travel_search_conversation)
