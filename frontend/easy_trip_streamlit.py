@@ -17,7 +17,7 @@ from shared.event_constant import SPLIT_PATTEN, SSETag
 from shared.datetime_util import get_kst_timestamp_label
 from frontend.client_constant.trip_api_constant import START_MESSAGE, LANG_STATE_URL, TRAVEL_API_URL
 
-st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="centered")
+st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="wide")
 st.title("🔁 SSE 기반 LLM 챗봇")
 
 
