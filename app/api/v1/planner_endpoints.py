@@ -1,53 +1,25 @@
-from fastapi import APIRouter
-from starlette.responses import StreamingResponse
+from fastapi import APIRouter, Query
 
-from app.cognitive_service.agent_langgraph.agent_graph import agent_app
-from app.cognitive_service.agent_langgraph.agent_graph_event import \
-    handle_streaming_event
 from app.core.logger.logger_config import get_logger
+from app.internal.services.trip_planner_langgraph_service import fetch_graph_state_by_session, trip_plan_agent_chat
 from app.schemes.agent_scheme import ChatRequest
-from shared.event_constant import (CHAIN_START, DATA_TAG, END_MSG,
-                                   SPLIT_PATTEN, STEP_TAG)
 
 logger = get_logger()
 trip_plan_router = APIRouter(prefix="/trip/plan", tags=["trip plan agent"])
 
 
+@trip_plan_router.get("/langgraph/state")
+def get_graph_state(session_id: str = Query(..., description="세션 ID")):
+    logger.info(f"랭그래프 세션 조회 호출. 세션 정보 : {session_id}")
+
+    return fetch_graph_state_by_session(session_id = session_id)
+
+
 @trip_plan_router.post("/astream-event")
 async def trip_plan(chat_request: ChatRequest):
-    logger.info(f"사용자 요청 정보 : {chat_request}")
-    streaming_events = agent_app.astream_events(
-        input=chat_request,
-        version="v2",
-        stream_mode=["updates"],
-        config={"configurable": {"thread_id": chat_request["session_id"]}},
-    )
+    logger.info(f"여행 계획 이벤트 API 호출. 사용자 요청 정보 : {chat_request}")
 
-    async def event_stream():
-        async for se in streaming_events:
-            kind = se["event"]
-            name = se.get("name")
-            data = se.get("data")
-
-            if kind == CHAIN_START:
-                if name == "intent_router":
-                    yield f"{STEP_TAG} 사용자의 요청을 분석중입니다.{SPLIT_PATTEN}"
-
-            if kind == "on_tool_start" and name == "intent_router":
-                yield f"{STEP_TAG} 의도 분석 중...{SPLIT_PATTEN}"
-
-            if kind == "on_tool_end" and name == "intent_router":
-                action = data.get("output", {}).get("action", "unknown")
-                yield f"{STEP_TAG} 의도 파악 완료 ({action}){SPLIT_PATTEN}"
-
-            elif kind == "on_chat_model_stream":
-                chunk = data["chunk"]
-                content = chunk.content
-                yield f"{DATA_TAG} {content}{SPLIT_PATTEN}"
-
-        yield f"{STEP_TAG} {END_MSG}{SPLIT_PATTEN}"
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return await trip_plan_agent_chat(chat_request)
 
 
 @trip_plan_router.get("/")

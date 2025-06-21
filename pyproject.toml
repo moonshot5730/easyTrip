@@ -24,6 +24,8 @@ langchain-google-genai = "^2.1.5"
 sseclient = "^0.0.27"
 graph-builder = "^0.2.0"
 langgraph = "^0.4.8"
+langchain-tavily = "^0.2.3"
+tavily-python = "^0.7.7"
 
 
 [build-system]

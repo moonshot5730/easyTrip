@@ -8,4 +8,4 @@ class ChatMessage(TypedDict):
 
 class ChatRequest(TypedDict):
     session_id: str
-    messages: List[ChatMessage]
+    message: ChatMessage
