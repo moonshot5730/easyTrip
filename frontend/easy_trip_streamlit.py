@@ -5,17 +5,18 @@ from pathlib import Path
 
 import requests
 
-
 # 스트림릿 스크립트 실행을 위해서 시스템 경로 root로 지정하는 코드
 root_path = str(Path(__file__).resolve().parent.parent)
 sys.path.append(root_path)
 
 import streamlit as st
 
+from frontend.client_constant.trip_api_constant import (LANG_STATE_URL,
+                                                        START_MESSAGE,
+                                                        TRAVEL_API_URL)
 from frontend.ui_component.chat_history_ui import render_chat_history
-from shared.event_constant import SPLIT_PATTEN, SSETag
 from shared.datetime_util import get_kst_timestamp_label
-from frontend.client_constant.trip_api_constant import START_MESSAGE, LANG_STATE_URL, TRAVEL_API_URL
+from shared.event_constant import SPLIT_PATTEN, SSETag
 
 st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="wide")
 st.title("🔁 SSE 기반 LLM 챗봇")
@@ -35,10 +36,7 @@ def init_session_state():
 def reset_session():
     prev_session_id = st.session_state.session_id
     st.session_state.session_history.append(
-        {
-            "session_id": prev_session_id,
-            "timestamp": get_kst_timestamp_label()
-        }
+        {"session_id": prev_session_id, "timestamp": get_kst_timestamp_label()}
     )
     st.session_state.session_id = str(uuid.uuid4())
     st.session_state.messages = [START_MESSAGE]
@@ -58,9 +56,12 @@ with st.sidebar.expander("🔎 현재 LangGraph 상태"):
     if st.button("📡 LangGraph 상태 가져오기"):
         try:
             # 예: FastAPI의 /graph-state endpoint 호출
-            response = requests.get(LANG_STATE_URL, params={
-                "session_id": current_session_id,
-            })
+            response = requests.get(
+                LANG_STATE_URL,
+                params={
+                    "session_id": current_session_id,
+                },
+            )
             response.raise_for_status()
 
             st.session_state.graph_state = response.json()
@@ -81,7 +82,9 @@ with st.sidebar.expander("🕘 세션 히스토리", expanded=False):
         st.write("히스토리가 없습니다.")
     else:
         for i, entry in enumerate(reversed(history), 1):
-            st.markdown(f"**{i}. {entry["timestamp"]}. 세션 ID:** `{entry['session_id']}`")
+            st.markdown(
+                f"**{i}. {entry["timestamp"]}. 세션 ID:** `{entry['session_id']}`"
+            )
 
 # UI 렌더링
 render_chat_history(st.session_state.messages)
@@ -117,7 +120,9 @@ if prompt := st.chat_input("메시지를 입력하세요"):
             stream=True,
             headers={"Accept": "text/event-stream"},
         ) as sse_response:
-            for event in sse_response.iter_content(chunk_size=None, decode_unicode=True):
+            for event in sse_response.iter_content(
+                chunk_size=None, decode_unicode=True
+            ):
                 if not event:
                     continue
 

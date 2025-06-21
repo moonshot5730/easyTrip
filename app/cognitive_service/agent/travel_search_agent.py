@@ -1,16 +1,20 @@
 import textwrap
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_last_message
-from app.cognitive_service.agent_llm.llm_models import creative_llm_nano, precise_llm_mini, precise_llm_nano
-from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results
+from app.cognitive_service.agent_core.graph_state import (AgentState,
+                                                          get_last_message)
+from app.cognitive_service.agent_llm.llm_models import (creative_llm_nano,
+                                                        precise_llm_mini,
+                                                        precise_llm_nano)
+from app.cognitive_service.agent_tool.travel_search_tool import (
+    parse_tavily_results, place_search_tool)
 from app.core.logger.logger_config import api_logger
 from shared.datetime_util import get_kst_year_month_date_label
 
-
-travel_search_system_prompt_template = textwrap.dedent("""
+travel_search_system_prompt_template = textwrap.dedent(
+    """
     당신은 대한민국 여행 지역과 장소들을 검색해주는 AI 리서치 KET입니다.
     
     KET의 도구 사용 규칙:
@@ -23,18 +27,26 @@ travel_search_system_prompt_template = textwrap.dedent("""
     - tavily_web_search: 사용자 질의에서 적절한 검색 키워드를 정리해 검색을 수행합니다.
     
     사용자 질문: {user_query}
-    """)
+    """
+)
 
 
 def travel_search_conversation(state: AgentState):
-    api_logger.info(f"[travel_search_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}")
+    api_logger.info(
+        f"[travel_search_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
+    )
 
-    user_query = state.get("user_query") or get_last_message(messages=state.get("messages", []))
+    user_query = state.get("user_query") or get_last_message(
+        messages=state.get("messages", [])
+    )
     new_user_message = HumanMessage(content=user_query)
 
-    system_message = SystemMessage(content=PromptTemplate.from_template(travel_search_system_prompt_template).format(user_query=user_query))
+    system_message = SystemMessage(
+        content=PromptTemplate.from_template(
+            travel_search_system_prompt_template
+        ).format(user_query=user_query)
+    )
     messages = [system_message] + [new_user_message]
-
 
     llm_response = precise_llm_nano.bind_tools([place_search_tool]).invoke(messages)
 
@@ -53,14 +65,16 @@ def travel_search_conversation(state: AgentState):
                 tool_messages.append(AIMessage(content=tool_content))
 
     return {
-        "messages": state.get("messages", []) + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages
+        "messages": state.get("messages", [])
+        + [new_user_message, AIMessage(content=llm_response.content)]
+        + tool_messages
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     messages = [
         SystemMessage(content=travel_search_system_prompt_template),
-        HumanMessage(content="대한민국 강원도 여행지에 대해서 검색해주세요.")
+        HumanMessage(content="대한민국 강원도 여행지에 대해서 검색해주세요."),
     ]
 
     binding_llm = precise_llm_nano.bind_tools([place_search_tool])

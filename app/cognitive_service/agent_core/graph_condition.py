@@ -15,10 +15,12 @@ def should_conversation(state: AgentState) -> str:
     :param state: 현재 그래프 상태 정보
     :return: 라우팅될 엣지 정보
     """
-    extract_travel_info = all([
-        state.get("travel_schedule") not in [None, "", "미정"],
-        state.get("travel_style") not in [None, "", "미정"]
-    ])
+    extract_travel_info = all(
+        [
+            state.get("travel_schedule") not in [None, "", "미정"],
+            state.get("travel_style") not in [None, "", "미정"],
+        ]
+    )
 
     if extract_travel_info:
         if state.get("travel_place") not in [None, "", "미정"]:
@@ -31,7 +33,9 @@ def should_conversation(state: AgentState) -> str:
     return "complete"
 
 
-def supervisor_router_str(state: AgentState) -> Literal["conversation", "search", "complete"]:
+def supervisor_router_str(
+    state: AgentState,
+) -> Literal["conversation", "search", "complete"]:
     """
     체크포인트로 저장된 state 정보를 보고 분기:
     - travel_place, travel_schedule, travel_style이 모두 비어 있고 검색 요청도 없는 경우 → 대화 시작 및 여행 안내(loop)
@@ -41,6 +45,7 @@ def supervisor_router_str(state: AgentState) -> Literal["conversation", "search"
         - 장소가 없고 검색 요청도 없음 → loop
     - 그 외 → complete [대화 끝]
     """
+
     def is_blank(value):
         return value in (None, "", "미정")
 
@@ -50,7 +55,10 @@ def supervisor_router_str(state: AgentState) -> Literal["conversation", "search"
     need_place_search = state.get("need_place_search")
 
     result = "conversation"
-    if all(map(is_blank, [travel_place, travel_schedule, travel_style])) and need_place_search is False:
+    if (
+        all(map(is_blank, [travel_place, travel_schedule, travel_style]))
+        and need_place_search is False
+    ):
         result = "conversation"
 
     if not is_blank(travel_schedule) and not is_blank(travel_style):
@@ -77,7 +85,12 @@ def state_router(state: AgentState) -> dict:
     travel_plan = state.get("travel_plan")
     need_place_search = state.get("need_place_search", False)
 
-    match (is_blank(travel_place), need_place_search, is_blank(travel_schedule), is_blank(travel_plan)):
+    match (
+        is_blank(travel_place),
+        need_place_search,
+        is_blank(travel_schedule),
+        is_blank(travel_plan),
+    ):
         case (_, True, _, _):
             next_node = "travel_search_conversation"
         case (True, False, _, _):

@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, List, Optional, TypedDict, Literal
+from typing import Annotated, Dict, List, Literal, Optional, TypedDict
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph import add_messages
@@ -39,6 +39,7 @@ def get_latest_messages(messages):
             break
 
     return latest_ai, latest_human
+
 
 def get_last_message(messages):
     return messages[-1].content if messages else ""

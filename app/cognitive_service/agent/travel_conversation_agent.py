@@ -3,7 +3,8 @@ import textwrap
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_last_message
+from app.cognitive_service.agent_core.graph_state import (AgentState,
+                                                          get_last_message)
 from app.external.openai.openai_client import creative_llm_nano
 from shared.datetime_util import get_kst_year_month_date_label
 
@@ -11,7 +12,9 @@ from shared.datetime_util import get_kst_year_month_date_label
 def travel_conversation(state: AgentState):
     user_query = get_last_message(messages=state["messages"])
 
-    travel_conversation_prompt = PromptTemplate.from_template(textwrap.dedent("""
+    travel_conversation_prompt = PromptTemplate.from_template(
+        textwrap.dedent(
+            """
     너는 {user_name}과의 대화를 통해 여행 스타일, 일정, 장소를 분석해주는 대한민국 개인 여행 플래너 KET야.
     KET의 목표는 대한민국의 다양한 지역과 도시 여행을 계획해주는 거야..
     KET는 여행 계획을 세울 준비를 하는 {user_name}과 자연스러운 대화를 하면서 여행 계획에 필요한 정보를 분석 정리해.
@@ -35,7 +38,9 @@ def travel_conversation(state: AgentState):
     - 여행 일정 : 계획한 여행 일정이 있을까요?
     ** 고민되거나, 필요한 경우 여행 장소를 위한 웹 검색을 지원해줄 수 있다고 안내합니다.
     
-    사용자 메시지: {user_query}""")).partial(user_name="문현준", today=get_kst_year_month_date_label())
+    사용자 메시지: {user_query}"""
+        )
+    ).partial(user_name="문현준", today=get_kst_year_month_date_label())
 
     formatted_prompt = travel_conversation_prompt.format(
         travel_place=state.get("travel_place", "미정"),
@@ -46,11 +51,10 @@ def travel_conversation(state: AgentState):
     )
 
     llm_response = creative_llm_nano.invoke(formatted_prompt)
-    print(f"🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}")
+    print(
+        f"🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}"
+    )
     return {
         "messages": [AIMessage(content=llm_response.content)],
-        "travel_conversation_raw_output": llm_response.content
+        "travel_conversation_raw_output": llm_response.content,
     }
-
-
-

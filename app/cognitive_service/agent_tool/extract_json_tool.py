@@ -9,6 +9,7 @@ from app.core.logger.logger_config import get_logger
 
 logger = get_logger()
 
+
 def make_print_tool(label: str):
     def tool(state: Dict[str, Any]):
         print(f"[{label}] 실행됨 - 입력: {state}")
@@ -40,5 +41,6 @@ def extract_travel_info(text: str) -> Command:
         update={
             "travel_place": "부산",
             "travel_schedule": "2025-08-01 ~ 2025-08-03",
-            "travel_style": "자연과 휴식"
-        })
+            "travel_style": "자연과 휴식",
+        }
+    )

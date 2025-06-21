@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query
 
 from app.core.logger.logger_config import get_logger
-from app.internal.services.trip_planner_langgraph_service import fetch_graph_state_by_session, trip_plan_agent_chat
+from app.internal.services.trip_planner_langgraph_service import (
+    fetch_graph_state_by_session, trip_plan_agent_chat)
 from app.schemes.agent_scheme import ChatRequest
 
 logger = get_logger()
@@ -12,7 +13,7 @@ trip_plan_router = APIRouter(prefix="/trip/plan", tags=["trip plan agent"])
 def get_graph_state(session_id: str = Query(..., description="세션 ID")):
     logger.info(f"랭그래프 세션 조회 호출. 세션 정보 : {session_id}")
 
-    return fetch_graph_state_by_session(session_id = session_id)
+    return fetch_graph_state_by_session(session_id=session_id)
 
 
 @trip_plan_router.post("/astream-event")

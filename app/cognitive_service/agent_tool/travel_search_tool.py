@@ -6,7 +6,7 @@ from langchain_tavily import TavilySearch
 os.environ["TAVILY_API_KEY"] = "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"
 
 place_search_tool = TavilySearch(
-    name="tavily_web_search", # 툴 이름
+    name="tavily_web_search",  # 툴 이름
     max_results=3,
     topic="general",
 )
@@ -22,9 +22,12 @@ def parse_tavily_results_markdown(tool_result: dict) -> str:
         title = item.get("title", "제목 없음")
         url = item.get("url", "#")
         summary = item.get("content", "")
-        result_lines.append(f"**{idx}. [{title}]({url})**\n\n-요약 정보: {summary.strip()}\n")
+        result_lines.append(
+            f"**{idx}. [{title}]({url})**\n\n-요약 정보: {summary.strip()}\n"
+        )
 
     return "\n---\n".join(result_lines)
+
 
 def parse_tavily_results(tool_result: dict) -> str:
     if not tool_result or "results" not in tool_result:
@@ -37,7 +40,8 @@ def parse_tavily_results(tool_result: dict) -> str:
 
     return result_lines
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     query = "시원한 여름 휴가 및 대한민국 여행지"
 
     # Tavily 웹 검색

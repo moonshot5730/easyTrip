@@ -1,19 +1,20 @@
 from fastapi import HTTPException
-from langchain_core.messages import HumanMessage, BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from starlette.responses import JSONResponse, StreamingResponse
 
-from app.cognitive_service.agent_core.manage_graph import agent_app
 from app.cognitive_service.agent_core.graph_event import handle_streaming_event
+from app.cognitive_service.agent_core.manage_graph import agent_app
 from app.core.logger.logger_config import api_logger
 from app.schemes.agent_scheme import ChatRequest
-from shared.event_constant import STEP_TAG, END_MSG, SPLIT_PATTEN, SSETag
-
+from shared.event_constant import END_MSG, SPLIT_PATTEN, STEP_TAG, SSETag
 
 
 def fetch_graph_state_by_session(session_id: str) -> JSONResponse:
     state = agent_app.get_state(checkpointer_config(session_id))
     if state is None:
-        raise HTTPException(status_code=404, detail=f"{session_id} 해당 세션 상태가 없습니다.")
+        raise HTTPException(
+            status_code=404, detail=f"{session_id} 해당 세션 상태가 없습니다."
+        )
 
     values = state.values.copy()
 

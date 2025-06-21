@@ -3,8 +3,10 @@ import textwrap
 TRAVEL_API_URL = "http://localhost:8000//trip/plan/astream-event"
 LANG_STATE_URL = "http://localhost:8000/trip/plan/langgraph/state"
 
-START_MESSAGE = {"role": "assistant", "content":
-    textwrap.dedent("""
+START_MESSAGE = {
+    "role": "assistant",
+    "content": textwrap.dedent(
+        """
     안녕하세요! 여행의 시작을 도와드릴 KET예요. 😊
     
     대한민국의 매력적인 여행지를 소개해 드리고, 원하는 스타일에 딱 맞는 여행 계획을 함께 만들어 드릴게요.
@@ -32,7 +34,9 @@ START_MESSAGE = {"role": "assistant", "content":
     
     이런 식으로 요청해 주시면, 당신만을 위한 대한민국 여행지를 딱 맞춰서 추천해 드릴게요. 😊
     
-    지금 어떤 여행을 떠나고 싶으신가요?""")}
+    지금 어떤 여행을 떠나고 싶으신가요?"""
+    ),
+}
 
 # 안녕하세요! KET(Korea Easy Trip)입니다.
 #
