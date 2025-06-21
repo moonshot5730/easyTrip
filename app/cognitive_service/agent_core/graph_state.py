@@ -20,6 +20,9 @@ class AgentState(TypedDict):
     travel_plan: Optional[dict]
     share_url: Optional[str]
 
+    is_websearh: Optional[bool]
+    websearch_results: Optional[str]
+
 
 def get_recent_human_messages(messages, limit=8):
     return [

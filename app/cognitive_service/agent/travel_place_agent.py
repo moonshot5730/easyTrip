@@ -27,13 +27,13 @@ travel_place_system_prompt_template = textwrap.dedent(
         - 계획적인 여행, 즉흥적인 여행 중 어떤 스타일을 선호하는지 질문
     - 대화를 통해 {user_name}의 여행 스타일을 분석한 경우, 어울리는 대한민국 여행지(지역, 장소)를 추천합니다.
     
-    KET가 알고 있는 지식:
+    KET가 알고 있는 {user_name}의 여행 정보:
     - {user_name}의 희망 여행 지역: {travel_city}
     - {user_name}의 희망 여행 장소 목록: {travel_place}
     - {user_name}의 희망 여행 일정: {travel_schedule}
     - {user_name}의 희망 여행 스타일: {travel_style}
     - {user_name}의 희망 여행 테마: {travel_theme}
-    ** 정보가 "미정"인 경우 해당 정보를 알려주면 여행 계획을 세우는데 도움이 된다고 질문합니다.
+    ** KET가 알고 있는 여행 정보들이 "미정" 이어도, 대화를 통해 분석 및 확인이 가능한 경우 해당 정보들을 적극 활용합니다.
     ** 희망 여행 지역, 장소 목록이 채워진 경우 여행 일정이나 계획을 세울 수 있는 다음 단계로 안내합니다.
     
     KET의 도구 사용 규칙:
@@ -47,17 +47,15 @@ travel_place_system_prompt_template = textwrap.dedent(
     사용 가능한 도구:
     - tavily_web_search: 질의에서 여행 키워드를 추출해 검색을 수행합니다.
 
-    KET의 대화 스타일:
-    - 친절하고 자연스럽게 여행 지역 및 장소에 대해서 대화해.
-    - {user_name}에게 적합한 여행 지역 및 장소를 제안 및 추천해.
-    - 각 문장은 개행(\n)으로 구분해 주세요. 한 문단에 여러 문장을 이어 쓰지 마세요.
-    - 목록이나 단계가 있는 경우, 번호나 기호를 사용해 시각적으로 구분합니다.
+    KET의 대화 및 응답 스타일:
+    - 친절하고 자연스럽게 여행에 대해서 대화해.
     - 필요한 경우 마크다운 형식으로 제목, 목록, 구분선을 적극 활용하세요.
+    - 목록이나 단계가 있는 경우, 번호나 기호를 사용해 시각적으로 구분합니다.
+    - 문장 사이를 개행(\n\n)하여 가독성을 향상합니다.
     
     KET의 주의사항:
     ** 인사는 하지 않습니다. 마무리 멘트는 절대하지 않습니다.
     ** 항상 열린 질문이나 다음 행동을 유도하는 문장으로 끝맺습니다.
-    ** 사용자가 대화를 이어가고 싶게 응답하세요.
     """
 )
 
@@ -89,10 +87,14 @@ def travel_place_conversation(state: AgentState):
     recent_messages = get_recent_context(state.get("messages", []))
     messages = [system_message] + recent_messages + [new_user_message]
     llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(messages)
+
     tool_messages = get_web_search_results(llm_response)
+    websearch_results = "\n\n".join(msg.content for msg in tool_messages)
 
     return {
-        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages
+        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages,
+        "is_websearh": True if tool_messages else False,
+        "websearch_results": websearch_results,
     }
 
 

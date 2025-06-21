@@ -4,7 +4,8 @@ from langgraph.graph import StateGraph
 
 from app.cognitive_service.agent.travel_place_agent import \
     travel_place_conversation
-from app.cognitive_service.agent_core.graph_condition import state_router
+from app.cognitive_service.agent.travel_search_summary_agent import travel_search_summary_conversation
+from app.cognitive_service.agent_core.graph_condition import state_router, is_websearch
 from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_parser.extract_travel_place_parser import \
     extract_travel_place_llm_parser
@@ -19,6 +20,7 @@ def create_korea_easy_trip_graph():
     # 노드 등록
     graph.add_node("travel_place_conversation", travel_place_conversation)
     graph.add_node("extract_travel_place_llm_parser", extract_travel_place_llm_parser)
+    graph.add_node("travel_search_summary_conversation", travel_search_summary_conversation)
 
     # 시작 지점
     graph.set_entry_point("state_router")
@@ -34,7 +36,17 @@ def create_korea_easy_trip_graph():
             "travel_plan_share": END,
         },
     )
-    graph.add_edge("travel_place_conversation", "extract_travel_place_llm_parser")
+    # graph.add_edge("travel_place_conversation", "extract_travel_place_llm_parser")
+    graph.add_conditional_edges(
+        "travel_place_conversation",
+        path=is_websearch,
+        path_map={
+            "web_summary": "travel_search_summary_conversation",
+            "extract": "extract_travel_place_llm_parser"
+        }
+    )
+
+
     checkpointer = MemorySaver()
     return graph.compile(checkpointer=checkpointer)
 
