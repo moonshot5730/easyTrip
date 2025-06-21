@@ -6,6 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_last_message)
 from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
+from app.core.logger.logger_config import api_logger
 from shared.datetime_util import get_kst_year_month_date_label
 
 travel_place_system_prompt_template = textwrap.dedent(
@@ -32,7 +33,7 @@ travel_place_system_prompt_template = textwrap.dedent(
 
 
 def travel_place_conversation(state: AgentState):
-    print(
+    api_logger.info(
         f"[travel_place_conversation!!!] 현재 상태 정보이니다: {state.get("messages", [])}"
     )
 
@@ -52,6 +53,5 @@ def travel_place_conversation(state: AgentState):
     llm_response = creative_llm_nano.invoke(messages)
 
     return {
-        "messages": state.get("messages", [])
-        + [new_user_message, AIMessage(content=llm_response.content)]
+        "messages": messages + [AIMessage(content=llm_response.content)]
     }
