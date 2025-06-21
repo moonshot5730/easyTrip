@@ -39,3 +39,8 @@ def state_router(state: AgentState) -> dict:
     api_logger.info(f" supervisor_router 반환 정보: {next_node}")
     api_logger.info(f" 갱신된 state 정보 : {updated_state}")
     return updated_state
+
+
+def is_websearch(state: AgentState) -> str:
+    api_logger.info(f"웹 검색을 수행하여 분기합니다. {state.get("is_websearh")}")
+    return "web_summary" if state.get("is_websearh") else "extract"

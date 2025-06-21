@@ -9,6 +9,7 @@ from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_recent_human_messages)
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
 from app.core.logger.logger_config import api_logger
+from shared.datetime_util import get_kst_year_month_date_label
 from shared.format_util import format_user_messages_with_index
 
 
@@ -21,6 +22,7 @@ class TravelPlaceOutput(BaseModel):
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
+
 extract_travel_info_prompt = PromptTemplate.from_template(
     textwrap.dedent(
         """
@@ -29,17 +31,23 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         
         KET가 추출할 개체 정보야:
         - travel_city: 여행 지역 및 도시
-        - travel_place: 세부 여행 장소 목록
+        - travel_place: 구체적인 여행 장소 및 관광지 목록
+            **: 지역이나 도시를 추출하지 않습니다. 지역과 도시 안에 있는 여행 장소 목록을 추출합니다.
         - travel_schedule: 계획중인 여행 일정 (YYYY-MM-DD~YYYY-MM-DD)
         - travel_style: 여행 계획 스타일 (즉흥, 계획, 상관없음 등등)
         - travel_theme: 계획중인 여행 테마 (자연, 힐링, 휴식, 놀거리 등등)
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다.
         
+        KET의 주의사항:
+        - 오늘의 날짜는 {today}야.
+        - 날짜를 기준으로 여행 일정 정보를 추출해야해. 
+        **절대 과거 일정으로 추출하지 않습니다.
+        
         응답 JSON 형식:
         {format_instructions}
         
         KET가 분석해야 할 대화:
-        사용자 메시지 목록: {user_query}""")).partial(format_instructions=travel_place_parser.get_format_instructions())
+        사용자 메시지 목록: {user_query}""")).partial(format_instructions=travel_place_parser.get_format_instructions(), today=get_kst_year_month_date_label(),)
 
 
 def extract_travel_place_llm_parser(state: AgentState):
