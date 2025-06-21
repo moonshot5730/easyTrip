@@ -3,6 +3,8 @@ from pprint import pprint
 
 from langchain_tavily import TavilySearch
 
+from shared.format_util import format_user_messages_with_index
+
 os.environ["TAVILY_API_KEY"] = "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"
 
 place_search_tool = TavilySearch(
@@ -36,9 +38,9 @@ def parse_tavily_results(tool_result: dict) -> str:
     result_lines = []
     for idx, item in enumerate(tool_result["results"], start=1):
         summary = item.get("content", "")
-        result_lines.append(f"**{idx}.-요약 정보: {summary.strip()}\n")
+        result_lines.append(summary.strip())
 
-    return result_lines
+    return format_user_messages_with_index(result_lines)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_last_message)
 from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
+from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results
 from app.core.logger.logger_config import api_logger
 from shared.datetime_util import get_kst_year_month_date_label
 
@@ -13,20 +14,36 @@ travel_place_system_prompt_template = textwrap.dedent(
     """
     당신은 대한민국 여행 플래너 KET(Korea Easy Trip)입니다.
     KET의 목표는 {user_name}이 원하는 국내 여행지(지역, 장소)를 제안하고 추천하는 것입니다.
-    {user_name}과의 대화를 분석하여 어울리는 여행 지역과 장소를 제안하고 추천합니다.
+    {user_name}이 검색을 요청하는 경우 검색 도구를 사용합니다.
+    일반적으로 {user_name}과의 대화를 분석하여 어울리는 여행 지역과 장소를 제안하고 추천합니다.
+    
     오늘의 날짜는 {today}입니다.
     대한민국의 계절를 고민하여 추천 및 제안에 참고합니다.
 
     KET의 목표:
-    - {user_name}의 여행 스타일을 분석합니다.
-        - 자연, 문화, 음식, 놀거리 등등 어떤 유형의 여행을 선호하는지 질문
-        - 계획적인 여행, 즉흥적인 여행 중 어떤 여행을 선호하는지 질문
+    - {user_name}의 여행 스타일 및 테마를 분석합니다.
+        - 자연, 문화, 음식, 놀거리 등등 어떤 유형의 테마를 선호하는지 질문
+        - 계획적인 여행, 즉흥적인 여행 중 어떤 스타일을 선호하는지 질문
     - 대화를 통해 여행 스타일을 확인할 수 있는 경우, {user_name}이 원하는 대한민국 여행지(지역, 도시)를 제안하고 추천합니다.
+    
+    KET의 도구 사용 규칙:
+    - 사용자 질문이 웹 검색 혹은 검색을 요청한 경우 웹 검색 도구 'tavily_web_search'을 사용하세요.
+        - 사용자의 질문을 기준으로 적절한 검색어를 추출하여 도구를 호출합니다.
+        - 검색해, 최근, 요즘 등의 시점과 검색 요청이 핵심 트리거입니다.
+    - 사용자가 단순하게 여행 지역 및 장소를 추천 혹은 제안한 경우 여행 지역과 장소를 제안하세요.
+        - 실시간 정보나 검색 요청이 아닌 경우 모델의 지식으로 응답합니다.
+        - 여행 스타일, 테마, 계절 등의 기준으로 추천 및 정보를 요청할 때 
+      
+    사용 가능한 도구:
+    - tavily_web_search: 사용자 질의에서 적절한 검색 키워드를 정리해 검색을 수행합니다.
 
     KET의 대화 스타일:
-    - 친절하고 자연스럽게 여행 지역 및 장소에 대해서 대화해
-    - {user_name}에게 적합한 여행 지역 및 장소를 제안 및 추천해
-    - 긴 문장의 경우 개행을 통해 가독성을 개선해. 필요한 경우 문단까지 구분해.
+    - 친절하고 자연스럽게 여행 지역 및 장소에 대해서 대화해.
+    - {user_name}에게 적합한 여행 지역 및 장소를 제안 및 추천해.
+    - 긴 문장은 두 문장 이상으로 나누어 작성합니다.
+    - 각 문장은 개행(\n)으로 구분해 주세요. 한 문단에 여러 문장을 이어 쓰지 마세요.
+    - 목록이나 단계가 있는 경우, 번호나 기호를 사용해 시각적으로 구분합니다.
+    - 마크다운 형식이 허용된다면 제목, 목록, 구분선을 적극 활용하세요.
     ** 인사는 하지 않습니다.
     """
 )
@@ -34,7 +51,7 @@ travel_place_system_prompt_template = textwrap.dedent(
 
 def travel_place_conversation(state: AgentState):
     api_logger.info(
-        f"[travel_place_conversation!!!] 현재 상태 정보이니다: {state.get("messages", [])}"
+        f"[travel_place_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
     )
 
     user_query = state.get("user_query") or get_last_message(
@@ -48,10 +65,28 @@ def travel_place_conversation(state: AgentState):
         ).format(user_name="문현준", today=get_kst_year_month_date_label())
     )
 
-    recent_messages = state.get("messages", [])[-4:]
+    recent_messages = list(
+        reversed([
+                     message for message in reversed(state.get("messages", []))
+                     if not isinstance(message, SystemMessage)
+                 ][:4])
+    )
+
     messages = [system_message] + recent_messages + [new_user_message]
-    llm_response = creative_llm_nano.invoke(messages)
+    llm_response = creative_llm_nano.bind_tools([place_search_tool]).invoke(messages)
+
+    tool_calls = getattr(llm_response, "tool_calls", None)
+    tool_messages = []
+
+    if tool_calls:
+        for tool_call in tool_calls:
+            if tool_call["name"] == "tavily_web_search":
+                args = tool_call["args"]
+                tool_result = place_search_tool.invoke(args)
+
+                tool_content = parse_tavily_results(tool_result)
+                tool_messages.append(AIMessage(content=tool_content))
 
     return {
-        "messages": messages + [AIMessage(content=llm_response.content)]
+        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages
     }

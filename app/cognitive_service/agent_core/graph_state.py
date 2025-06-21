@@ -26,6 +26,12 @@ class AgentState(TypedDict):
     share_url: Optional[str]
 
 
+def get_recent_human_messages(messages, limit=8):
+    return [
+        message.content for message in reversed(messages[-limit:])
+        if isinstance(message, HumanMessage)
+    ]
+
 def get_latest_messages(messages):
     latest_ai = ""
     latest_human = ""
