@@ -8,7 +8,7 @@ from app.core.lifecycle.env_setting import load_env
 from app.core.lifecycle.validate_key_setting import validate_env_keys
 
 allowed_origins = [
-    "http://localhost:8501",  # 개발용
+    "http://localhost:8501",
     "http://127.0.0.1:8501",
 ]
 

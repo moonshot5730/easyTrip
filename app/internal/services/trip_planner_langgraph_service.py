@@ -4,9 +4,8 @@ from starlette.responses import JSONResponse, StreamingResponse
 
 from app.cognitive_service.agent_core.graph_event import handle_streaming_event
 from app.cognitive_service.agent_core.manage_graph import agent_app
-from app.core.logger.logger_config import api_logger
 from app.schemes.agent_scheme import ChatRequest
-from shared.event_constant import END_MSG, SPLIT_PATTEN, STEP_TAG, SSETag
+from shared.event_constant import SSETag
 
 
 def fetch_graph_state_by_session(session_id: str) -> JSONResponse:
@@ -34,7 +33,6 @@ async def trip_plan_agent_chat(chat_request: ChatRequest) -> StreamingResponse:
     user_message = HumanMessage(**chat_request["message"])
 
     streaming_events = agent_app.astream_events(
-        # input={"messages": [user_message]},
         input={"user_query": user_message.content},
         version="v2",
         stream_mode=["updates"],
