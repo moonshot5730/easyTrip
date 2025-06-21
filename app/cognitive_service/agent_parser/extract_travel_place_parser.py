@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_latest_messages, get_recent_human_messages)
+                                                          get_recent_human_messages)
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
 from app.core.logger.logger_config import api_logger
 from shared.format_util import format_user_messages_with_index

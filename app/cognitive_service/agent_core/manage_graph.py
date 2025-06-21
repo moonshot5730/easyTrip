@@ -18,7 +18,6 @@ def create_korea_easy_trip_graph():
 
     # 노드 등록
     graph.add_node("travel_place_conversation", travel_place_conversation)
-
     graph.add_node("extract_travel_place_llm_parser", extract_travel_place_llm_parser)
 
     # 시작 지점
@@ -30,8 +29,8 @@ def create_korea_easy_trip_graph():
         path=lambda x: x["next_node"],
         path_map={
             "travel_place_conversation": "travel_place_conversation",
-            "travel_schedule_conversation": END,
             "travel_plan_conversation": END,
+            "travel_schedule_conversation": END,
             "travel_plan_share": END,
         },
     )
@@ -39,9 +38,7 @@ def create_korea_easy_trip_graph():
     checkpointer = MemorySaver()
     return graph.compile(checkpointer=checkpointer)
 
-
 agent_app = create_korea_easy_trip_graph()
-
 
 if __name__ == "__main__":
     print(agent_app.get_graph().draw_mermaid())
