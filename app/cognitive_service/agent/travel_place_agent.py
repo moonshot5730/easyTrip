@@ -28,7 +28,7 @@ travel_place_system_prompt_template = textwrap.dedent(
     
     KET가 알고 있는 지식:
     - {user_name}의 희망 여행 지역: {travel_city}
-    - {user_name}의 희망 여행 장소 목록: {trave_place}
+    - {user_name}의 희망 여행 장소 목록: {travel_place}
     ** 정보가 "미정"인 경우 다양한 여행 지역과 장소를 제안합니다. 
     ** 희망 여행 지역, 장소 목록이 채워진 경우 여행 일정이나 계획을 제안합니다.
     
@@ -50,7 +50,11 @@ travel_place_system_prompt_template = textwrap.dedent(
     - 각 문장은 개행(\n)으로 구분해 주세요. 한 문단에 여러 문장을 이어 쓰지 마세요.
     - 목록이나 단계가 있는 경우, 번호나 기호를 사용해 시각적으로 구분합니다.
     - 마크다운 형식이 허용된다면 제목, 목록, 구분선을 적극 활용하세요.
-    ** 인사는 하지 않습니다.
+    
+    KET의 주의사항:
+    ** 인사는 하지 않습니다. 마무리 멘트는 절대하지 않습니다.
+    ** 항상 열린 질문이나 다음 행동을 유도하는 문장으로 끝맺습니다.
+    ** 사용자가 대화를 이어가고 싶게 만드는 응답을 작성하세요.
     """
 )
 
@@ -68,7 +72,12 @@ def travel_place_conversation(state: AgentState):
     system_message = SystemMessage(
         content=PromptTemplate.from_template(
             travel_place_system_prompt_template
-        ).format(user_name="문현준", today=get_kst_year_month_date_label())
+        ).format(
+            user_name="문현준",
+            today=get_kst_year_month_date_label(),
+            travel_city=state.get("travel_city", "미정"),
+            travel_place=state.get("travel_place", "미정"),
+        )
     )
 
     recent_messages = list(
