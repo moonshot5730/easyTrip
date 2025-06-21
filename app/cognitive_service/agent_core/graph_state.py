@@ -7,6 +7,7 @@ from langgraph.graph import add_messages
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
+    flow_path: Optional[str]
     intent: Literal["tavel_conversation", "search"]
 
     travel_place: Optional[str]
@@ -36,3 +37,6 @@ def get_latest_messages(messages):
             break
 
     return latest_ai, latest_human
+
+def get_last_human_message(messages):
+    return messages[-1].content if messages else ""

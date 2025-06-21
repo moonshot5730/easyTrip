@@ -7,8 +7,9 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode
 
-from app.cognitive_service.agent_core.graph_condition import should_conversation
-from app.cognitive_service.agent_core.graph_state import AgentState
+from app.cognitive_service.agent_core.graph_condition import should_conversation, lang_condition, \
+    supervisor_router
+from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
 from app.cognitive_service.agent_parser.travel_conversation_json_parser import extract_info_llm_parser
 from app.cognitive_service.agent_tool.extract_json_tool import extract_travel_info
 from app.cognitive_service.agent_tool.travel_search_tool import search_place_tool
@@ -17,7 +18,10 @@ from shared.datetime_util import get_kst_year_month_date_label
 
 
 def travel_conversation(state: AgentState):
-    user_query = state["messages"][-1].content if state["messages"] else ""
+    print(f"[travel_conversation 시작!!] state 정보: {state}")
+    print(f" 현재 state 정보 : {state}")
+
+    user_query = get_last_human_message(messages=state["messages"])
 
     travel_conversation_prompt = PromptTemplate.from_template(textwrap.dedent("""
     너는 {user_name}과의 대화를 통해 여행 스타일, 일정, 장소를 분석해주는 대한민국 여행 컨설턴트 KET야.
@@ -61,37 +65,31 @@ def travel_conversation(state: AgentState):
         "travel_conversation_raw_output": llm_response
     }
 
-def create_graph():
+def create_korea_easy_trip_graph():
     graph = StateGraph(AgentState)
+
+    # ✅ 시작 라우터
+    graph.add_node("supervisor_router", supervisor_router)
 
     # 노드 등록
     graph.add_node("travel_conversation", travel_conversation)
     graph.add_node("extract_info_llm_parser", extract_info_llm_parser)
-    graph.add_node("extract_info_tool", ToolNode(tools=[extract_travel_info]))
-    graph.add_node("search_place_tool", ToolNode(tools=[search_place_tool]))
 
     # 시작 지점
-    graph.set_entry_point("travel_conversation")
+    graph.set_entry_point("supervisor_router")
 
-    # travel_conversation → ToolNode
-    graph.add_edge("travel_conversation", "extract_info_llm_parser")
-
-    # ToolNode → travel_conversation (조건적 반복)
+    # 시작 분기
     graph.add_conditional_edges(
-        "extract_info_llm_parser",
-        path=should_conversation,
+        "supervisor_router",
+        path=lambda x: x["flow_path"],
         path_map={
-            "loop": "travel_conversation",
-            "search": "search_place_tool",  # 예시로 장소 검색 ToolNode
+            "conversation": "travel_conversation",
+            "search": END,
             "complete": END
         }
     )
+    graph.add_edge("travel_conversation", "extract_info_llm_parser")
 
-    graph.add_conditional_edges(  # 🔁 검색 노드도 종료되도록 분기 추가
-        "search_place_tool",
-        path=lambda state: END,
-        path_map={END: END}
-    )
 
     return graph.compile()
 
@@ -99,7 +97,7 @@ def create_graph():
 
 # 단일 테스트용
 if __name__ == '__main__':
-    travel_conversation_graph = create_graph()
+    travel_conversation_graph = create_korea_easy_trip_graph()
     print(travel_conversation_graph.get_graph().draw_mermaid())
 
 
