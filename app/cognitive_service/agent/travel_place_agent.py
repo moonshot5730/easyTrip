@@ -4,9 +4,10 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_last_message)
+                                                          get_last_message, get_recent_context)
 from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
-from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results
+from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results, \
+    get_web_search_results
 from app.core.logger.logger_config import api_logger
 from shared.datetime_util import get_kst_year_month_date_label
 
@@ -80,28 +81,13 @@ def travel_place_conversation(state: AgentState):
         )
     )
 
-    recent_messages = list(
-        reversed([
-                     message for message in reversed(state.get("messages", []))
-                     if not isinstance(message, SystemMessage)
-                 ][:4])
-    )
-
+    recent_messages = get_recent_context(state.get("messages", []))
     messages = [system_message] + recent_messages + [new_user_message]
     llm_response = creative_llm_nano.bind_tools([place_search_tool]).invoke(messages)
-
-    tool_calls = getattr(llm_response, "tool_calls", None)
-    tool_messages = []
-
-    if tool_calls:
-        for tool_call in tool_calls:
-            if tool_call["name"] == "tavily_web_search":
-                args = tool_call["args"]
-                tool_result = place_search_tool.invoke(args)
-
-                tool_content = parse_tavily_results(tool_result)
-                tool_messages.append(AIMessage(content=tool_content))
+    tool_messages = get_web_search_results(llm_response)
 
     return {
         "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages
     }
+
+

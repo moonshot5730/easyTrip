@@ -1,6 +1,6 @@
 from typing import Annotated, Dict, List, Literal, Optional, TypedDict
 
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import add_messages
 
 
@@ -49,3 +49,12 @@ def get_latest_messages(messages):
 
 def get_last_message(messages):
     return messages[-1].content if messages else ""
+
+def get_recent_context(messages, limit=4):
+    recent_messages = list(
+        reversed([
+                     message for message in reversed(messages)
+                     if not isinstance(message, SystemMessage)
+                 ][:limit])
+    )
+    return recent_messages

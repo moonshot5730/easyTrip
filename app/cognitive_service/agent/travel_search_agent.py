@@ -32,6 +32,11 @@ travel_search_system_prompt_template = textwrap.dedent(
 
 
 def travel_search_conversation(state: AgentState):
+    """
+    deprecated 검색을 위한 에이전트지만 사용하지 않습니다.
+    :param state:
+    :return:
+    """
     api_logger.info(
         f"[travel_search_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
     )

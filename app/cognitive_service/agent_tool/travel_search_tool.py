@@ -1,6 +1,7 @@
 import os
 from pprint import pprint
 
+from langchain_core.messages import AIMessage
 from langchain_tavily import TavilySearch
 
 from shared.format_util import format_user_messages_with_index
@@ -12,6 +13,20 @@ place_search_tool = TavilySearch(
     max_results=3,
     topic="general",
 )
+
+
+def get_web_search_results(llm_response):
+    tool_calls = getattr(llm_response, "tool_calls", None)
+    tool_messages = []
+    if tool_calls:
+        for tool_call in tool_calls:
+            if tool_call["name"] == "tavily_web_search":
+                args = tool_call["args"]
+                tool_result = place_search_tool.invoke(args)
+
+                tool_content = parse_tavily_results(tool_result)
+                tool_messages.append(AIMessage(content=tool_content))
+    return tool_messages
 
 
 def parse_tavily_results_markdown(tool_result: dict) -> str:
