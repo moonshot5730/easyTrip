@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_latest_messages)
 from app.core.logger.logger_config import get_logger
-from app.external.openai.openai_client import precise_llm_nano
+from app.external.openai.openai_client import precise_llm_nano, precise_openai_fallbacks
 
 logger = get_logger()
 
@@ -51,7 +51,7 @@ def extract_info_llm_parser(state: AgentState):
     formatted_prompt = extract_travel_info_prompt.format(
         ai_message=ai_message, user_query=user_query
     )
-    raw_output = precise_llm_nano.invoke(formatted_prompt)
+    raw_output = precise_openai_fallbacks.invoke(formatted_prompt)
 
     logger.info(
         f"[extract_info_llm_parser START!] 🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {raw_output.content}"

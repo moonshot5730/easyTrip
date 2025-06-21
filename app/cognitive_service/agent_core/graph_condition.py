@@ -25,6 +25,8 @@ def state_router(state: AgentState) -> dict:
     ):
         case (_, _, True, True):
             next_node = "travel_place_conversation"
+        case (False, False, True, True):
+            next_node = "travel_schedule"
         case (False, False, False, True):
             next_node = "travel_plan_conversation"
         case (False, False, False, False):

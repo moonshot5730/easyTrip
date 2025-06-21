@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_last_message)
-from app.external.openai.openai_client import creative_llm_nano
+from app.external.openai.openai_client import creative_llm_nano, creative_openai_fallbacks
 from shared.datetime_util import get_kst_year_month_date_label
 
 
@@ -46,11 +46,10 @@ def travel_conversation(state: AgentState):
         travel_place=state.get("travel_place", "미정"),
         travel_schedule=state.get("travel_schedule", "미정"),
         travel_style=state.get("travel_place", "미정"),
-        need_place_search=state.get("need_place_search", "false"),
         user_query=user_query,
     )
 
-    llm_response = creative_llm_nano.invoke(formatted_prompt)
+    llm_response = creative_openai_fallbacks.invoke(formatted_prompt)
     print(
         f"🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}"
     )

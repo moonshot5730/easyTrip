@@ -9,6 +9,7 @@ from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
 from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results, \
     get_web_search_results
 from app.core.logger.logger_config import api_logger
+from app.external.openai.openai_client import creative_openai_fallbacks
 from shared.datetime_util import get_kst_year_month_date_label
 
 travel_place_system_prompt_template = textwrap.dedent(
@@ -83,7 +84,7 @@ def travel_place_conversation(state: AgentState):
 
     recent_messages = get_recent_context(state.get("messages", []))
     messages = [system_message] + recent_messages + [new_user_message]
-    llm_response = creative_llm_nano.bind_tools([place_search_tool]).invoke(messages)
+    llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(messages)
     tool_messages = get_web_search_results(llm_response)
 
     return {

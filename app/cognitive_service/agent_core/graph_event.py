@@ -94,7 +94,7 @@ def handle_streaming_event(event: dict):
             yield f"{SSETag.STREAM}{chunk}{SPLIT_PATTEN}"
 
         case ChatModelEvents.END:
-            api_logger.info(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}")
 
             output = getattr(data.get("output", None), "content", "[출력 없음]")
             messages = data.get("input", {}).get("messages", [])
@@ -112,20 +112,19 @@ def handle_streaming_event(event: dict):
             yield f"{SSETag.STREAM} __DONE__\n\n"
 
         case LLMEvents.START:
-            api_logger.info(f"[📝 LLM 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[📝 LLM 시작] 노드 이름: {node_name}")
 
         case LLMEvents.STREAM:
             token = data.get("chunk", {}).get("text", "")
-            api_logger.info(f"{token}", flush=True)
+            api_logger.info(f"{token}")
 
         case LLMEvents.END:
-            api_logger.info(f"[📝 LLM 종료] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[📝 LLM 종료] 노드 이름: {node_name}")
 
         case ToolEvents.START:
             tool_name = data.get("input")
             api_logger.info(
                 f"[🔧 툴 시작] 노드 이름: {node_name} 입력 정보: → {tool_name}",
-                flush=True,
             )
             # yield format_sse_event_state(tag_name=SSE_NODE_TAG, event_type=ToolEvents.START, name=tool_name,status="시작")
             yield format_sse_event_state_json(
@@ -139,7 +138,6 @@ def handle_streaming_event(event: dict):
             tool_output = data.get("output")
             api_logger.info(
                 f"[🔧 툴 종료] 노드 이름: {node_name} → 결과 정보:: {tool_output}",
-                flush=True,
             )
             # yield format_sse_event_state(tag_name=SSE_NODE_TAG, event_type=ToolEvents.END, name=tool_name, status="완료")
 
@@ -157,7 +155,7 @@ def handle_streaming_event(event: dict):
                 )
 
         case RetrieverEvents.START:
-            api_logger.info(f"[🔍 리트리버 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🔍 리트리버 시작] 노드 이름: {node_name}")
             # yield f"{SSE_SEARCH_TAG}### RetrieverEvents.START 노드 정보: {node_name} \n - 상태: 시작\n\n\n\n"
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
@@ -170,21 +168,19 @@ def handle_streaming_event(event: dict):
             doc_list = data.get("documents", [])
             api_logger.info(
                 f"[🔍 리트리버 종료] 노드 이름: {node_name} → 문서 목록 정보: {doc_list}",
-                flush=True,
             )
             # yield f"{SSE_SEARCH_TAG}### RetrieverEvents.END 노드 정보: {node_name} 검색 호출 완료 문서 목록 : {doc_list}!\n\n\n\n"
 
         case PromptEvents.START:
-            api_logger.info(f"[🧱 프롬프트 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🧱 프롬프트 시작] 노드 이름: {node_name}")
 
         case PromptEvents.END:
-            api_logger.info(f"[🧱 프롬프트 완료] 노드 이름: {node_name}", flush=True)
-            api_logger.info(f"[📜 Prompt 텍스트] 노드 이름:\n{data.get('output')}", flush=True)
+            api_logger.info(f"[🧱 프롬프트 완료] 노드 이름: {node_name}")
+            api_logger.info(f"[📜 Prompt 텍스트] 노드 이름:\n{data.get('output')}")
 
         case _:
             api_logger.info(
                 f"[📎 등록되지 않은 기타 이벤트] 이벤트 정보: {event_type} 노드 정보: {node_name}",
-                flush=True,
             )
 
 
