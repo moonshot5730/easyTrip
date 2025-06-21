@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from app.cognitive_service.agent_tool.travel_search_tool import \
     parse_tavily_results_markdown
-from shared.event_constant import DATA_TAG, SPLIT_PATTEN, SSETag
+from app.core.logger.logger_config import api_logger
+from shared.event_constant import SPLIT_PATTEN, SSETag
 
 
 @dataclass(frozen=True)
@@ -53,8 +54,7 @@ def handle_streaming_event(event: dict):
 
     match event_type:
         case ChainEvents.START:
-            # print(f"[🚀 체인 시작] 노드 이름: {node_name}", flush=True)
-            # sse_data["message"] = f"체인 시작: {node_name}"
+            # api_logger.info(f"[🚀 체인 시작] 노드 이름: {node_name}", flush=True)
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
                 event_type=ChainEvents.START,
@@ -63,8 +63,7 @@ def handle_streaming_event(event: dict):
             )
 
         case ChainEvents.STREAM:
-            # print(f"[🔄 체인 중간 상태 스트리밍...] 노드 이름: {node_name}", flush=True)
-            # sse_data["message"] = f"체인 중간 상태 스트리밍: {node_name}"
+            # api_logger.info(f"[🔄 체인 중간 상태 스트리밍...] 노드 이름: {node_name}", flush=True)
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
                 event_type=ChainEvents.STREAM,
@@ -73,11 +72,10 @@ def handle_streaming_event(event: dict):
             )
 
         case ChainEvents.END:
-            # print(f"[✅ 체인 종료] 노드 이름 : {node_name}", flush=True)
+            # api_logger.info(f"[✅ 체인 종료] 노드 이름 : {node_name}", flush=True)
             # output = data.get("output")
-            # print(f"[📦 최종 출력 결과] 노드 이름: {output}", flush=True)
+            # api_logger.info(f"[📦 최종 출력 결과] 노드 이름: {output}", flush=True)
 
-            # yield format_sse_event_state(tag_name=SSE_NODE_TAG, event_type=ChainEvents.END, name=node_name, status="완료")
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
                 event_type=ChainEvents.END,
@@ -87,16 +85,16 @@ def handle_streaming_event(event: dict):
 
         case ChatModelEvents.START:
             pass
-            # print(f"[🧠 Chat 모델 시작] 노드 이름: {node_name}")
+            # api_logger.info(f"[🧠 Chat 모델 시작] 노드 이름: {node_name}")
             # yield f"{SSE_NODE_TAG}### ChatModelEvents.START \n - 노드 정보: {node_name}\n - 상태: 시작\n\n\n\n"
 
         case ChatModelEvents.STREAM:
             chunk = data.get("chunk", {}).content
-            # print(f"{chunk}", end="\n", flush=True)
+            # api_logger.info(f"{chunk}", end="\n", flush=True)
             yield f"{SSETag.STREAM}{chunk}{SPLIT_PATTEN}"
 
         case ChatModelEvents.END:
-            print(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🧠 Chat 모델 응답 완료] 노드 이름: {node_name}", flush=True)
 
             output = getattr(data.get("output", None), "content", "[출력 없음]")
             messages = data.get("input", {}).get("messages", [])
@@ -105,27 +103,27 @@ def handle_streaming_event(event: dict):
             else:
                 user_message = "[메시지 없음]"
 
-            print("\n", f"[💬 대화 요약]")
-            print(
+            api_logger.info("\n", f"[💬 대화 요약]")
+            api_logger.info(
                 f"🙋 대화 정보들: 현재 메시지 길이: {len(messages[0])} 정보: {messages}"
             )
-            print(f"🙋 대화: {user_message}")
-            print(f"🤖 최종 결과: {output}", "\n")
+            api_logger.info(f"🙋 대화: {user_message}")
+            api_logger.info(f"🤖 최종 결과: {output}", "\n")
             yield f"{SSETag.STREAM} __DONE__\n\n"
 
         case LLMEvents.START:
-            print(f"[📝 LLM 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[📝 LLM 시작] 노드 이름: {node_name}", flush=True)
 
         case LLMEvents.STREAM:
             token = data.get("chunk", {}).get("text", "")
-            print(f"{token}", flush=True)
+            api_logger.info(f"{token}", flush=True)
 
         case LLMEvents.END:
-            print(f"[📝 LLM 종료] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[📝 LLM 종료] 노드 이름: {node_name}", flush=True)
 
         case ToolEvents.START:
             tool_name = data.get("input")
-            print(
+            api_logger.info(
                 f"[🔧 툴 시작] 노드 이름: {node_name} 입력 정보: → {tool_name}",
                 flush=True,
             )
@@ -139,7 +137,7 @@ def handle_streaming_event(event: dict):
 
         case ToolEvents.END:
             tool_output = data.get("output")
-            print(
+            api_logger.info(
                 f"[🔧 툴 종료] 노드 이름: {node_name} → 결과 정보:: {tool_output}",
                 flush=True,
             )
@@ -159,7 +157,7 @@ def handle_streaming_event(event: dict):
                 )
 
         case RetrieverEvents.START:
-            print(f"[🔍 리트리버 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🔍 리트리버 시작] 노드 이름: {node_name}", flush=True)
             # yield f"{SSE_SEARCH_TAG}### RetrieverEvents.START 노드 정보: {node_name} \n - 상태: 시작\n\n\n\n"
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
@@ -170,21 +168,21 @@ def handle_streaming_event(event: dict):
 
         case RetrieverEvents.END:
             doc_list = data.get("documents", [])
-            print(
+            api_logger.info(
                 f"[🔍 리트리버 종료] 노드 이름: {node_name} → 문서 목록 정보: {doc_list}",
                 flush=True,
             )
             # yield f"{SSE_SEARCH_TAG}### RetrieverEvents.END 노드 정보: {node_name} 검색 호출 완료 문서 목록 : {doc_list}!\n\n\n\n"
 
         case PromptEvents.START:
-            print(f"[🧱 프롬프트 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🧱 프롬프트 시작] 노드 이름: {node_name}", flush=True)
 
         case PromptEvents.END:
-            print(f"[🧱 프롬프트 완료] 노드 이름: {node_name}", flush=True)
-            print(f"[📜 Prompt 텍스트] 노드 이름:\n{data.get('output')}", flush=True)
+            api_logger.info(f"[🧱 프롬프트 완료] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[📜 Prompt 텍스트] 노드 이름:\n{data.get('output')}", flush=True)
 
         case _:
-            print(
+            api_logger.info(
                 f"[📎 등록되지 않은 기타 이벤트] 이벤트 정보: {event_type} 노드 정보: {node_name}",
                 flush=True,
             )
