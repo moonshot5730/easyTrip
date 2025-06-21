@@ -53,8 +53,6 @@ with st.sidebar.expander("🙋 사용자 정보", expanded=True):
     else:
         st.session_state["user_name"] = user_name
         st.markdown(f"**✅ 입력된 이름:** `{user_name}`")
-        st.rerun()
-
 
 current_session_id = st.session_state.session_id
 
