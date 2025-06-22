@@ -5,6 +5,7 @@ from langgraph.graph import add_messages
 
 
 class AgentState(TypedDict):
+    session_id: Optional[str]
     user_query: Optional[str]
     user_name: Optional[str]
     messages: Annotated[list, add_messages]

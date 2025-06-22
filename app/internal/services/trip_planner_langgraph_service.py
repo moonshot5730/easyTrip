@@ -31,15 +31,17 @@ def checkpointer_config(session_id):
 
 async def trip_plan_agent_chat(chat_request: ChatRequest) -> StreamingResponse:
     user_message = HumanMessage(**chat_request["message"])
+    session_id = chat_request["session_id"]
 
     streaming_events = agent_app.astream_events(
         input={
             "user_query": user_message.content,
             "user_name": chat_request.get("user_name", "사용자"),
+            "session_id": session_id
         },
         version="v2",
         stream_mode=["updates"],
-        config=checkpointer_config(chat_request["session_id"]),
+        config=checkpointer_config(session_id),
     )
 
     async def event_stream():
