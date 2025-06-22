@@ -1,3 +1,4 @@
+import asyncio
 import os
 import textwrap
 
@@ -64,3 +65,24 @@ def plan_share_action(state: AgentState):
     }
 
 
+if __name__ == "__main__":
+    async def run_test():
+        plan_md = textwrap.dedent("""# 제주도 여행 일정  
+            - 1일차: 성산 일출봉  
+            - 2일차: 우도 투어  
+            - 3일차: 한라산 등반""")
+
+        test_state = {
+            "session_id": "test-session-123",
+            "travel_plan_markdown": plan_md,
+            "messages": [],
+        }
+
+        result = plan_share_action(test_state)
+
+        print(f"\n공유 URL: {result.get("share_url")}")
+        print("\n메시지 기록:")
+        for message in result["messages"]:
+            print(f"{message}")
+
+    asyncio.run(run_test())

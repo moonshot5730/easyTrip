@@ -1,3 +1,4 @@
+import asyncio
 import textwrap
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -55,26 +56,23 @@ def travel_search_summary_conversation(state: AgentState):
     }
 
 
+
 if __name__ == "__main__":
-    messages = [
-        SystemMessage(content=travel_search_summary_system_prompt_template),
-        HumanMessage(content="대한민국 강원도 여행지에 대해서 검색해주세요."),
-    ]
+    async def run_test():
+        test_state: AgentState = {
+            "user_name": "문현준",
+            "websearch_results": textwrap.dedent("""
+                1. 강릉 안목해변은 여름철 해수욕과 카페거리로 유명합니다.
+                2. 경포대는 아름다운 호수와 해변 경관으로 여행객들에게 인기가 높습니다.
+                3. 오죽헌은 율곡 이이와 신사임당의 유적으로 조용한 분위기의 명소입니다.
+                """),
+            "messages": [],
+        }
 
-    binding_llm = precise_openai_fallbacks.bind_tools([place_search_tool])
-    llm_response = binding_llm.invoke(messages)
+        result = travel_search_summary_conversation(test_state)
 
-    # 📌 function call이 발생했는지 확인
-    tool_calls = getattr(llm_response, "tool_calls", None)
+        print("\요약 응답:")
+        for msg in result["messages"]:
+            print(f"{msg}")
 
-    results = []
-    if tool_calls:
-        for tool_call in tool_calls:
-            if tool_call["name"] == "tavily_web_search":
-                args = tool_call["args"]
-                tool_result = place_search_tool.invoke(args)
-                results.append(tool_result)
-
-    print(f"llm 응답 {llm_response}")
-    print(f"tool_calls 정보: {tool_calls}")
-    print(f"검색 결과 : {results}")
+    asyncio.run(run_test())

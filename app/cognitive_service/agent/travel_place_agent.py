@@ -1,3 +1,4 @@
+import asyncio
 import textwrap
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -99,3 +100,41 @@ def travel_place_conversation(state: AgentState):
         "is_websearh": True if tool_messages else False,
         "websearch_results": websearch_results,
     }
+
+
+if __name__ == "__main__":
+    async def run_test():
+        test_search_state: AgentState = {
+            "user_query": "요즘 갈만한 국내 여행지 추천 및 검색해줘",
+            "user_name": "문현준",
+            "travel_city": "미정",
+            "travel_place": "미정",
+            "travel_schedule": "미정",
+            "travel_style": "계획적인 여행",
+            "travel_theme": "자연",
+            "messages": [],
+        }
+
+        test_state: AgentState = {
+            "user_query": "2박 3일 일정으로 국내 여행을 계획하고 있어",
+            "user_name": "문현준",
+            "travel_city": "미정",
+            "travel_place": "미정",
+            "travel_schedule": "미정",
+            "travel_style": "계획적인 여행",
+            "travel_theme": "자연",
+            "messages": [],
+        }
+
+        result_search_state = travel_place_conversation(test_search_state)
+        result_state = travel_place_conversation(test_state)
+
+        print("\n[search 호출 테스트] 웹검색을 수행해야 함")
+        print(f"\n웹검색 수행 여부: {result_search_state.get("is_websearh")}")
+        print(f"\n웹 검색 결과 요약: {result_search_state.get("websearch_results")}\n",)
+
+        print("\n[search 호출 테스트] 웹 검색 없이 일반 응답 제공해야 함")
+        print(f"\n웹검색 수행 여부: {result_state.get("is_websearh")}" )
+        print(f"\n웹 검색 결과 요약:\n {result_state.get("websearch_results")}")
+
+    asyncio.run(run_test())

@@ -10,5 +10,9 @@ ENV_PATH = BASE_DIR / ".env"
 LOG_DIR = BASE_DIR / "logs"
 LOG_FILE = LOG_DIR / f"api_{get_today_str()}.log"
 
+SQLLITE_DIR = BASE_DIR / "sqllite"
+SQLLITE_DB = SQLLITE_DIR / "trip_plan.db"
+SQLLITE_DB.parent.mkdir(parents=True, exist_ok=True)
+
 SHARE_BASE_PATH = BASE_DIR / "tmp" / "share_html"
 SHARE_BASE_URL = "http://localhost:8000/trip/plan/share"
