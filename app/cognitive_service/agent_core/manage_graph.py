@@ -2,21 +2,22 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END
 from langgraph.graph import StateGraph
 
+from app.cognitive_service.agent.manage_calendar_action import manage_calendar_action
+from app.cognitive_service.agent.share_plan_action import plan_share_action
 from app.cognitive_service.agent.travel_place_agent import \
     travel_place_conversation
 from app.cognitive_service.agent.travel_plan_agent import \
     travel_plan_conversation
 from app.cognitive_service.agent.travel_search_summary_agent import \
     travel_search_summary_conversation
+from app.cognitive_service.agent.trip_plan_action_agent import travel_plan_action
 from app.cognitive_service.agent_core.graph_condition import (is_websearch,
-                                                              state_router)
+                                                              state_router, check_plan_action)
 from app.cognitive_service.agent_core.graph_state import AgentState
 from app.cognitive_service.agent_parser.extract_travel_place_parser import \
     extract_travel_place_llm_parser
 from app.cognitive_service.agent_parser.extract_travel_plan_parser import \
     extract_travel_plan_llm_parser
-from app.cognitive_service.agent_tool.share_tool import \
-    travel_plan_action_conversation
 
 
 def create_korea_easy_trip_graph():
@@ -33,7 +34,7 @@ def create_korea_easy_trip_graph():
         "travel_plan_conversation", travel_plan_conversation
     )  # 여행 계획 대화
     graph.add_node(
-        "travel_plan_action", travel_plan_action_conversation
+        "travel_plan_action", travel_plan_action
     )  # 여행 계획 대화
 
     # 노드 이후 리프 노드
@@ -45,6 +46,12 @@ def create_korea_easy_trip_graph():
     )  # 여행 계획 추출 파서
     graph.add_node(
         "travel_search_summary_conversation", travel_search_summary_conversation
+    )  # 여행 정보 검색 결과 요약
+    graph.add_node(
+        "manage_calendar_action", manage_calendar_action
+    )  # 여행 정보 검색 결과 요약
+    graph.add_node(
+        "plan_share_action", plan_share_action
     )  # 여행 정보 검색 결과 요약
 
     # 시작 지점
@@ -71,6 +78,15 @@ def create_korea_easy_trip_graph():
         },
     )
     graph.add_edge("travel_plan_conversation", "extract_travel_plan_llm_parser")
+    graph.add_conditional_edges(
+        "travel_plan_action",
+        path=check_plan_action,
+        path_map={
+            "manage_calendar": "manage_calendar_action",
+            "plan_share": "plan_share_action",
+            "plan_update": "travel_plan_conversation",
+        },
+    )
     checkpointer = MemorySaver()
     return graph.compile(checkpointer=checkpointer)
 
