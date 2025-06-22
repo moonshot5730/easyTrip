@@ -3,31 +3,20 @@ import json
 from typing import List
 
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
 
 from app.internal.services.travel_plan_service import create_plans, get_all_plan_by_session, delete_plans_by_session
 from app.models.travel_plan import TravelPlan
+from app.schemes.calendar_scheme import TravelPlansInput, TravelPlanInput
 from shared.format_util import convert_input_to_travel_plans
 
 
-class TravelPlanInput(BaseModel):
-    trip_date: str = Field(description="YYYY-MM-DD 형식의 여행 날짜")
-    trip_schedule: str = Field(description="요약 일정 텍스트")
-
-class TravelPlansInput(BaseModel):
-    session_id: str
-    plans: List[TravelPlanInput]
-
 
 @tool("register_calendar", args_schema=TravelPlansInput)
-def register_calendar(llm_output: TravelPlansInput) -> dict:
+def register_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """여행 일정을 등록합니다. 이미 존재하면 등록 불가."""
-    try:
-        session_id, travel_plans = convert_input_to_travel_plans(llm_output)
-    except Exception as e:
-        return {"status": "error", "message": f"JSON 파싱 실패: {e}"}
+    register_plans = convert_input_to_travel_plans(session_id, plans)
 
-    return asyncio.run(_register_calendar(session_id, travel_plans))
+    return asyncio.run(_register_calendar(session_id, register_plans))
 
 async def _register_calendar(session_id: str, travel_plans: List[TravelPlan]) -> dict:
     try:
@@ -48,9 +37,10 @@ async def _register_calendar(session_id: str, travel_plans: List[TravelPlan]) ->
 
 
 @tool("read_calendar", args_schema=TravelPlansInput)
-def read_calendar(llm_output: TravelPlansInput) -> dict:
+def read_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """등록된 일정을 조회합니다."""
-    return asyncio.run(_read_calendar(session_id=llm_output.session_id))
+
+    return asyncio.run(_read_calendar(session_id=session_id))
 
 async def _read_calendar(session_id: str) -> dict:
     try:
@@ -69,13 +59,11 @@ async def _read_calendar(session_id: str) -> dict:
         return {"status": "error", "message": f"조회 과정에서 예외가 발생했습니다. {str(e)}"}
 
 @tool("register_calendar", args_schema=TravelPlansInput)
-def update_calendar(llm_output: TravelPlansInput) -> dict:
+def update_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """여행 일정을 수정합니다. 이미 존재하면 삭제 후 새로운 데이터 추가."""
-    try:
-        session_id, new_travel_plans = convert_input_to_travel_plans(llm_output)
-    except Exception as e:
-        return {"status": "error", "message": f"JSON 파싱 실패: {e}"}
-    return asyncio.run(_update_calendar(session_id=session_id, new_plans=new_travel_plans))
+    register_plans = convert_input_to_travel_plans(session_id, plans)
+
+    return asyncio.run(_update_calendar(session_id=session_id, new_plans=register_plans))
 
 async def _update_calendar(session_id: str, new_plans: List[TravelPlan]) -> dict:
     try:
@@ -96,9 +84,9 @@ async def _update_calendar(session_id: str, new_plans: List[TravelPlan]) -> dict
         return {"status": "error", "message": f"수정 과정에서 예외가 발생했습니다. {str(e)}"}
 
 @tool("delete_calendar", args_schema=TravelPlansInput)
-def delete_calendar(llm_output: TravelPlansInput) -> dict:
+def delete_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """session_id로 등록된 일정을 모두 삭제합니다."""
-    return asyncio.run(_delete_calendar(session_id=llm_output.session_id))
+    return asyncio.run(_delete_calendar(session_id=session_id))
 
 
 async def _delete_calendar(session_id: str,) -> dict:

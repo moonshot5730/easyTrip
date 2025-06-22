@@ -6,6 +6,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
 from app.cognitive_service.agent_tool.calendar_tool import calendar_tools
+from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
 
 
@@ -15,54 +16,52 @@ def manage_calendar_action(state: AgentState):
     system_prompt = textwrap.dedent("""
     당신은 일정 관리 에이전트입니다.
     아래 사용자 입력 정보와 요청 정보를 보고 적절한 일정 관련 Tool을 호출하세요.
-    
+
     ### 사용 가능한 도구 목록 및 스키마
     - register_calendar: 사용자가 새로운 일정을 등록을 요청했습니다.
     - read_calendar: 사용자가 일정 조회를 요청했습니다.
     - update_calendar: 사용자가 기존 일정을 삭제하고 새 일정을 등록 혹은 수정을 요청했습니다.
-    - delete_calendar: 사용자가 기존 일정을 삭제 요청했습니다..
-
+    - delete_calendar: 사용자가 기존 일정을 삭제 요청했습니다.
 
     사용자의 요청:
     {user_query}
-    
+
     사용자의 여행 일정 정보 :
     {travel_plan_dict}
-    
+
     세션 식별자(session_id): {session_id}
-    
+
     반드시 tool 값은 위에서 설명한 네 가지 중 하나여야 합니다.
     응답 시 반드시 위 도구 중 하나를 JSON 포맷으로 호출해야 하며, 다음 규칙을 지켜야 합니다:
+
     ```json
-    {
+    {{
       "tool": "register_calendar",
-      "data": {
+      "data": {{
         "session_id": "세션 고유 ID (예: abc123)",
         "plans": [
-          {
+          {{
             "trip_date": "YYYY-MM-DD 형식의 날짜 (예: 2025-07-20)",
             "trip_schedule": "요약 일정 텍스트 (예: 제주도 해변 산책)"
-          },
-          {
+          }},
+          {{
             "trip_date": "YYYY-MM-DD",
             "trip_schedule": "다음 일정"
-          }
-          ...
+          }}
         ]
-      }
-    }""").strip()
+      }}
+    }}""").strip()
 
     messages = [
         SystemMessage(content=system_prompt.format(
-            user_query=user_query),
+            user_query=user_query,
             travel_plan_dict=state.get("travel_plan_dict", {}),
             session_id=state.get("session_id", ""),
-        ),
-        HumanMessage(content=user_query),
+        ))
     ]
-
     # LLM에게 도구 바인딩 후 실행
     response = precise_openai_fallbacks.bind_tools(calendar_tools).invoke(messages)
+    api_logger.info(f"일정 추출 response 정보: {response}")
 
     # ToolCall 결과 추출
     tool_calls = getattr(response, "tool_calls", None)
