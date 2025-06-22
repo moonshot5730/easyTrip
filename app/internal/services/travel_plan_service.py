@@ -34,13 +34,13 @@ async def get_all_plan_by_session(session_id: str) -> Optional[List[TravelPlan]]
 
 
 
-async def delete_plans_by_session(session_id: str) -> int:
+async def delete_plans_by_session(session_id: str) -> List[TravelPlan]:
     async with AsyncSession(sqllite_aio_engine) as session:
         result = await session.exec(
             delete(TravelPlan).where(TravelPlan.session_id == session_id)
         )
         await session.commit()
-        return result.rowcount
+        return result
 
 
 
