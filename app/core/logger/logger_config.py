@@ -28,3 +28,6 @@ def get_logger(log_file: str = LOG_FILE) -> logging.Logger:
         logger.addHandler(file_handler)
 
     return logger
+
+
+api_logger = get_logger()

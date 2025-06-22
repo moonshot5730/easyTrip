@@ -4,7 +4,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from app.core.constant.env_constant import REQUIRED_KEY
 from app.core.constant.path_constant import ENV_PATH
 from app.core.logger.logger_config import get_logger
 
@@ -22,13 +21,3 @@ def load_env():
 
     load_dotenv(dotenv_path=env_file)
     logger.info(f"환경 파일 {env_file} 로드 완료했습니다.")
-
-    missing_keys = [key for key in REQUIRED_KEY if not os.environ.get(key)]
-
-    if missing_keys:
-        logger.error(
-            f"다음 필수 환경 변수가 설정되지 않았습니다:  {', '.join(missing_keys)} 해당 환경 변수는 필수 정보입니다. 시스템을 종료합니다."
-        )
-        sys.exit(1)
-
-    logger.info("모든 필수 환경 변수가 설정되었습니다. :)")

@@ -19,6 +19,16 @@ requests = "^2.32.4"
 black = "^25.1.0"
 isort = "^6.0.1"
 langchain-openai = "^0.3.23"
+google-genai = "^1.20.0"
+langchain-google-genai = "^2.1.5"
+sseclient = "^0.0.27"
+graph-builder = "^0.2.0"
+langgraph = "^0.4.8"
+langchain-tavily = "^0.2.3"
+tavily-python = "^0.7.7"
+markdown2 = "^2.5.3"
+aiosqlite = "^0.21.0"
+sqlmodel = "^0.0.24"
 
 
 [build-system]

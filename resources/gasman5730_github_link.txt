@@ -1,0 +1,5 @@
+AI 서비스 개발자 문현준 지원자
+과제 깃헙 정보
+
+dev: https://github.com/moonshot5730/easyTrip/tree/dev
+main: https://github.com/moonshot5730/easyTrip/tree/main
