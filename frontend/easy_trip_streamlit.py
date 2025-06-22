@@ -46,6 +46,7 @@ def reset_session():
 init_session_state()
 
 with st.sidebar.expander("🙋 사용자 정보", expanded=True):
+    st.session_state["user_name"] = "사용자"
     user_name = st.text_input("이름을 입력하세요", placeholder="예: 문현준")
 
     if not user_name:
