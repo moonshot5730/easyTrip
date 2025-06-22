@@ -1,3 +1,4 @@
+import asyncio
 import textwrap
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -86,3 +87,25 @@ def travel_plan_conversation(state: AgentState):
         "messages": recent_messages
         + [new_user_message, AIMessage(content=llm_response.content)]
     }
+
+if __name__ == "__main__":
+    async def run_test():
+        # 테스트할 에이전트 상태 구성
+        test_state: AgentState = {
+            "user_query": "여행 일정을 좀 정리해줘",
+            "user_name": "문현준",
+            "travel_city": "강릉",
+            "travel_place": ["안목해변", "경포대", "오죽헌"],
+            "travel_schedule": "2025-07-20",
+            "travel_style": "계획적인 여행",
+            "travel_theme": "자연",
+            "messages": [],
+        }
+
+        result_state = travel_plan_conversation(test_state)
+
+        api_logger.info("\n📌 응답 메시지:")
+        for msg in result_state["messages"]:
+            api_logger.info(f"{msg}")
+
+    asyncio.run(run_test())

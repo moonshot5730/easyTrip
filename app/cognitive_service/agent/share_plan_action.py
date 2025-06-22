@@ -68,9 +68,9 @@ def plan_share_action(state: AgentState):
 if __name__ == "__main__":
     async def run_test():
         plan_md = textwrap.dedent("""# 제주도 여행 일정  
-- 1일차: 성산 일출봉  
-- 2일차: 우도 투어  
-- 3일차: 한라산 등반""")
+            - 1일차: 성산 일출봉  
+            - 2일차: 우도 투어  
+            - 3일차: 한라산 등반""")
 
         test_state = {
             "session_id": "test-session-123",
@@ -80,9 +80,9 @@ if __name__ == "__main__":
 
         result = plan_share_action(test_state)
 
-        print("\n📌 공유 URL:", result.get("share_url"))
-        print("\n🧾 메시지 기록:")
-        for m in result["messages"]:
-            print(f" - {type(m).__name__}: {getattr(m, 'content', str(m))}")
+        api_logger.info(f"\n📌 공유 URL: {result.get("share_url")}")
+        api_logger.info("\n🧾 메시지 기록:")
+        for message in result["messages"]:
+            api_logger.info(f"{message}")
 
     asyncio.run(run_test())

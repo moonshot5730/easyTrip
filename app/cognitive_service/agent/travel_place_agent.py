@@ -102,7 +102,6 @@ def travel_place_conversation(state: AgentState):
     }
 
 
-# 테스트용 main 진입
 if __name__ == "__main__":
     async def run_test():
         test_search_state: AgentState = {
@@ -130,12 +129,12 @@ if __name__ == "__main__":
         result_search_state = travel_place_conversation(test_search_state)
         result_state = travel_place_conversation(test_state)
 
-        print("\n[search 호출 테스트] 웹검색을 수행해야 함")
-        print("\n🔎웹검색 수행 여부:", result_search_state.get("is_websearh"))
-        print("\n🌐 웹 검색 결과 요약:\n", result_search_state.get("websearch_results"))
+        api_logger.info("\n[search 호출 테스트] 웹검색을 수행해야 함")
+        api_logger.info(f"\n🔎웹검색 수행 여부: {result_search_state.get("is_websearh")}")
+        api_logger.info(f"\n🌐 웹 검색 결과 요약: {result_search_state.get("websearch_results")}\n",)
 
-        print("\n[search 호출 테스트] 웹 검색 없이 일반 응답 제공해야 함")
-        print("\n🔎 웹검색 수행 여부:", result_state.get("is_websearh"))
-        print("\n🌐 웹 검색 결과 요약:\n", result_state.get("websearch_results"))
+        api_logger.info("\n[search 호출 테스트] 웹 검색 없이 일반 응답 제공해야 함")
+        api_logger.info(f"\n🔎 웹검색 수행 여부: {result_state.get("is_websearh")}" )
+        api_logger.info(f"\n🌐 웹 검색 결과 요약:\n {result_state.get("websearch_results")}")
 
     asyncio.run(run_test())
