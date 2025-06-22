@@ -54,7 +54,7 @@ def handle_streaming_event(event: dict):
 
     match event_type:
         case ChainEvents.START:
-            # api_logger.info(f"[🚀 체인 시작] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🚀 체인 시작] 노드 이름: {node_name}")
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
                 event_type=ChainEvents.START,
@@ -63,7 +63,7 @@ def handle_streaming_event(event: dict):
             )
 
         case ChainEvents.STREAM:
-            # api_logger.info(f"[🔄 체인 중간 상태 스트리밍...] 노드 이름: {node_name}", flush=True)
+            api_logger.info(f"[🔄 체인 중간 상태 스트리밍...] 노드 이름: {node_name}")
             yield format_sse_event_state_json(
                 tag_name=SSETag.NODE,
                 event_type=ChainEvents.STREAM,
@@ -73,7 +73,7 @@ def handle_streaming_event(event: dict):
 
         case ChainEvents.END:
             # api_logger.info(f"[✅ 체인 종료] 노드 이름 : {node_name}", flush=True)
-            # output = data.get("output")
+            output = data.get("output")
             # api_logger.info(f"[📦 최종 출력 결과] 노드 이름: {output}", flush=True)
 
             yield format_sse_event_state_json(
@@ -85,7 +85,7 @@ def handle_streaming_event(event: dict):
 
         case ChatModelEvents.START:
             pass
-            # api_logger.info(f"[🧠 Chat 모델 시작] 노드 이름: {node_name}")
+            api_logger.info(f"[🧠 Chat 모델 시작] 노드 이름: {node_name}")
             # yield f"{SSE_NODE_TAG}### ChatModelEvents.START \n - 노드 정보: {node_name}\n - 상태: 시작\n\n\n\n"
 
         case ChatModelEvents.STREAM:

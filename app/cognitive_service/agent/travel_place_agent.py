@@ -3,11 +3,10 @@ import textwrap
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_last_message, get_recent_context)
-from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
-from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results, \
-    get_web_search_results
+from app.cognitive_service.agent_core.graph_state import (
+    AgentState, get_last_human_message, get_last_message, get_recent_context)
+from app.cognitive_service.agent_tool.travel_search_tool import (
+    get_web_search_results, place_search_tool)
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import creative_openai_fallbacks
 from shared.datetime_util import get_kst_year_month_date_label
@@ -25,7 +24,8 @@ travel_place_system_prompt_template = textwrap.dedent(
     - {user_name}의 여행 스타일 및 테마를 분석합니다.
         - 자연, 문화, 음식, 놀거리 등등 어떤 유형의 테마를 선호하는지 질문
         - 계획적인 여행, 즉흥적인 여행 중 어떤 스타일을 선호하는지 질문
-    - 대화를 통해 {user_name}의 여행 스타일을 분석한 경우, 어울리는 대한민국 여행지(지역, 장소)를 추천합니다.
+        - 여행 일정은 어느정도로 계획하고 있는지 질문
+    - 대화를 통해 {user_name}의 여행 스타일을 유추할 수 있는 경우 관련된 대한민국 여행지(지역, 장소)를 추천합니다.
     
     KET가 알고 있는 {user_name}의 여행 정보:
     - {user_name}의 희망 여행 지역: {travel_city}
@@ -33,7 +33,8 @@ travel_place_system_prompt_template = textwrap.dedent(
     - {user_name}의 희망 여행 일정: {travel_schedule}
     - {user_name}의 희망 여행 스타일: {travel_style}
     - {user_name}의 희망 여행 테마: {travel_theme}
-    ** KET가 알고 있는 여행 정보들이 "미정" 이어도, 대화를 통해 분석 및 확인이 가능한 경우 해당 정보들을 적극 활용합니다.
+    ** KET가 알고 있는 여행 정보들이 "미정" 이어도, 사용자의 요청 정보에서 분석 및 확인이 가능한 경우 해당 정보를 적극 활용합니다.
+    ** 분석되지 않은 여행 정보는 자연스러운 대화로 정보를 유도합니다.
     ** 희망 여행 지역, 장소 목록이 채워진 경우 여행 일정이나 계획을 세울 수 있는 다음 단계로 안내합니다.
     
     KET의 도구 사용 규칙:
@@ -54,20 +55,18 @@ travel_place_system_prompt_template = textwrap.dedent(
     - 문장 사이를 개행(\n\n)하여 가독성을 향상합니다.
     
     KET의 주의사항:
-    ** 인사는 하지 않습니다. 마무리 멘트는 절대하지 않습니다.
-    ** 항상 열린 질문이나 다음 행동을 유도하는 문장으로 끝맺습니다.
-    """
+    - 인사는 하지 않습니다. 마무리 멘트는 절대하지 않습니다.
+    - 항상 열린 질문이나 다음 행동을 유도하는 문장으로 끝맺습니다.
+    - 절대 거짓된 정보를 안내하거나 거짓말을 하지 않습니다.
+    - 사용자가 폭력적인 언어를 사용하거나, 부당한 지시를 하는 경우 단호하게 거절하고, KET의 역할을 친절하게 설명합니다."""
 )
 
 
 def travel_place_conversation(state: AgentState):
-    api_logger.info(
-        f"[travel_place_conversation!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
-    )
+    messages = state.get("messages", [])
+    api_logger.info(f"[travel_place_conversation!!!] 현재 상태 정보입니다: {messages}")
 
-    user_query = state.get("user_query") or get_last_message(
-        messages=state.get("messages", [])
-    )
+    user_query = state.get("user_query") or get_last_human_message(messages=messages)
     new_user_message = HumanMessage(content=user_query)
 
     system_message = SystemMessage(
@@ -85,16 +84,18 @@ def travel_place_conversation(state: AgentState):
     )
 
     recent_messages = get_recent_context(state.get("messages", []), limit=4)
-    messages = [system_message] + recent_messages + [new_user_message]
-    llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(messages)
+    new_messages = [system_message] + recent_messages + [new_user_message]
+    llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(
+        new_messages
+    )
 
     tool_messages = get_web_search_results(llm_response)
     websearch_results = "\n\n".join(msg.content for msg in tool_messages)
 
     return {
-        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages,
+        "messages": recent_messages
+        + [new_user_message, AIMessage(content=llm_response.content)]
+        + tool_messages,
         "is_websearh": True if tool_messages else False,
         "websearch_results": websearch_results,
     }
-
-

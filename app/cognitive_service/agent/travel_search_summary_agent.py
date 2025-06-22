@@ -3,11 +3,12 @@ import textwrap
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import (AgentState)
-from app.cognitive_service.agent_llm.llm_models import (precise_llm_nano)
-from app.cognitive_service.agent_tool.travel_search_tool import (
-    place_search_tool)
+from app.cognitive_service.agent_core.graph_state import AgentState
+from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
+from app.cognitive_service.agent_tool.travel_search_tool import \
+    place_search_tool
 from app.core.logger.logger_config import api_logger
+from app.external.openai.openai_client import precise_openai_fallbacks
 from shared.datetime_util import get_kst_year_month_date_label
 
 travel_search_summary_system_prompt_template = textwrap.dedent(
@@ -40,12 +41,16 @@ def travel_search_summary_conversation(state: AgentState):
     system_message = SystemMessage(
         content=PromptTemplate.from_template(
             travel_search_summary_system_prompt_template
-        ).format(search_results=state.get("websearch_results", []), today=get_kst_year_month_date_label())
+        ).format(
+            search_results=state.get("websearch_results", []),
+            today=get_kst_year_month_date_label(),
+        )
     )
-    llm_response = precise_llm_nano.invoke([system_message])
+    llm_response = precise_openai_fallbacks.invoke([system_message])
 
     return {
-        "messages": state.get("messages", []) + [AIMessage(content=llm_response.content)],
+        "messages": state.get("messages", [])
+        + [AIMessage(content=llm_response.content)],
         "is_websearh": False,
     }
 
@@ -56,7 +61,7 @@ if __name__ == "__main__":
         HumanMessage(content="대한민국 강원도 여행지에 대해서 검색해주세요."),
     ]
 
-    binding_llm = precise_llm_nano.bind_tools([place_search_tool])
+    binding_llm = precise_openai_fallbacks.bind_tools([place_search_tool])
     llm_response = binding_llm.invoke(messages)
 
     # 📌 function call이 발생했는지 확인

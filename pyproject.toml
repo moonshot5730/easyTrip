@@ -26,6 +26,7 @@ graph-builder = "^0.2.0"
 langgraph = "^0.4.8"
 langchain-tavily = "^0.2.3"
 tavily-python = "^0.7.7"
+markdown2 = "^2.5.3"
 
 
 [build-system]

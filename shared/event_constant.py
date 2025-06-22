@@ -2,6 +2,7 @@ from enum import Enum
 
 SPLIT_PATTEN = "\n\n"
 
+
 class SSETag(str, Enum):
     CHAT = "chat: "
     STREAM = "stream: "
