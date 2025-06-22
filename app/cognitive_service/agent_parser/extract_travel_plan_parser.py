@@ -64,9 +64,7 @@ def extract_travel_plan_llm_parser(state: AgentState):
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 
-    api_logger.info(
-        f"[extract_travel_plan_llm_parser START!] 🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}"
-    )
+    api_logger.info("[extract_travel_plan_llm_parser START!] 호출! ")
 
     travel_plan_info = travel_plan_parser.parse(llm_response.content)
     api_logger.info(travel_plan_info.model_dump_json(indent=2))

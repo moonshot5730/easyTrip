@@ -86,22 +86,25 @@ def extract_travel_place_llm_parser(state: AgentState):
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 
-    api_logger.info(
-        f"[extract_travel_place_llm_parser START!] 🧾 전송한 프롬프트 정보: {formatted_prompt}\n원본 LLM 응답:\n {llm_response.content}"
-    )
-
     travel_place_info = travel_place_parser.parse(llm_response.content)
     api_logger.info(travel_place_info.model_dump_json(indent=2))
 
     new_style = travel_place_info.travel_style
     new_theme = travel_place_info.travel_theme
-    current_style = state.get("travel_place", "")
-    current_theme = state.get("travel_place", "")
+    new_schedule = travel_place_info.travel_schedule
+    new_travel_place= travel_place_info.travel_place
+    new_travel_city = travel_place_info.travel_city
+
+    current_style = state.get("travel_style", "")
+    current_theme = state.get("travel_theme", "")
+    current_schedule = state.get("travel_schedule", "")
+    current_travel_city = state.get("travel_city", "")
+    current_travel_place= state.get("travel_place", "")
 
     return {
-        "travel_city": travel_place_info.travel_city,
-        "travel_place": travel_place_info.travel_place,
-        "travel_schedule": travel_place_info.travel_schedule,
+        "travel_city": new_travel_city if new_travel_city not in (None, "") else current_travel_city,
+        "travel_place": new_travel_place if new_travel_place not in ([], [""]) else current_travel_place,
+        "travel_schedule": new_schedule if new_schedule not in (None, "") else current_schedule,
         "travel_style": new_style if new_style not in (None, "") else current_style,
         "travel_theme": new_theme if new_theme not in (None, "") else current_theme,
         "intent": travel_place_info.intent,
