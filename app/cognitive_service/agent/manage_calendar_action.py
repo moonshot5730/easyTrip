@@ -1,3 +1,5 @@
+import asyncio
+
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
@@ -52,3 +54,28 @@ def manage_calendar_action(state: AgentState):
         "messages": state["messages"] + [HumanMessage(content=user_query)] + tool_messages,
         "calendar_info": tool_results,
     }
+
+if __name__ == "__main__":
+    async def run_test():
+        fake_state = {
+            "messages": [
+                HumanMessage(content="제주도 여행을 떠나고 싶어."),
+                HumanMessage(content="즉흥적인 여행 스타일이고, 2박 3일 동안 여행을 계획하고 있어."),
+                HumanMessage(content="한라산이랑 협재 해수욕장으로 여행 계획을 세워줄래"),
+                HumanMessage(content="내 일정 중에 이번 주 여행 계획을 수정하고 싶어.")
+            ],
+            "user_query": "2일차 일정을 한라산 일정으로 변경해줘",
+        }
+
+        result = manage_calendar_action(fake_state)
+
+        print("\n📌 Final State:")
+        for k, v in result.items():
+            if k == "messages":
+                print(f"\n{k}:\n")
+                for m in v:
+                    print(f" - {type(m).__name__}: {getattr(m, 'content', str(m))}")
+            else:
+                print(f"{k}: {v}")
+
+    asyncio.run(run_test())
