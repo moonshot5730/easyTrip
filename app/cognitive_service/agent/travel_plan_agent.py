@@ -104,8 +104,8 @@ if __name__ == "__main__":
 
         result_state = travel_plan_conversation(test_state)
 
-        api_logger.info("\n📌 응답 메시지:")
+        print("\n📌 응답 메시지:")
         for msg in result_state["messages"]:
-            api_logger.info(f"{msg}")
+            print(f"{msg}")
 
     asyncio.run(run_test())

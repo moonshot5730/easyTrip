@@ -65,3 +65,24 @@ def travel_plan_action(state: AgentState):
         "plan_action": plan_action_output.action,
         "messages": state["messages"] + [AIMessage(content=plan_action_output.model_dump_json())],
     }
+
+if __name__ == "__main__":
+    async def run_test():
+        # 테스트용 상태 정의
+        test_state: AgentState = {
+            "user_query": "이번 여행 일정을 캘린더에 등록하고 싶어.",
+            "messages": [],
+            "user_name": "문현준"
+        }
+
+        result = travel_plan_action(test_state)
+
+        print("\n🧠 여행 계획 행동 분석 결과:")
+        print(f"📌 plan_intent: {result['plan_intent']}")
+        print(f"🔧 plan_action: {result['plan_action']}")
+        print("\n📝 messages:")
+        for msg in result["messages"]:
+            role = getattr(msg, "type", msg.__class__.__name__)
+            print(f"\n[{role}]\n{getattr(msg, 'content', str(msg))}")
+
+    asyncio.run(run_test())

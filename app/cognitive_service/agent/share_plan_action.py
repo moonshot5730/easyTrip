@@ -80,9 +80,9 @@ if __name__ == "__main__":
 
         result = plan_share_action(test_state)
 
-        api_logger.info(f"\n📌 공유 URL: {result.get("share_url")}")
-        api_logger.info("\n🧾 메시지 기록:")
+        print(f"\n📌 공유 URL: {result.get("share_url")}")
+        print("\n🧾 메시지 기록:")
         for message in result["messages"]:
-            api_logger.info(f"{message}")
+            print(f"{message}")
 
     asyncio.run(run_test())
