@@ -1,5 +1,5 @@
 import textwrap
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
@@ -17,9 +17,10 @@ from shared.format_util import format_user_messages_with_index
 class TravelPlaceOutput(BaseModel):
     travel_city: Optional[str] = Field(default="미정")
     travel_place: Optional[List[str]] = Field(default=["미정"])
-    travel_schedule: Optional[str] = Field(default=["미정"])
-    travel_style: Optional[str] = Field(default=["미정"])
-    travel_theme: Optional[str] = Field(default=["미정"])
+    travel_schedule: Optional[str] = Field(default="미정")
+    travel_style: Optional[str] = Field(default="미정")
+    travel_theme: Optional[str] = Field(default="미정")
+    intent: Optional[Literal["travel_search", "manage_calendar", "travel_plan", "plan_share"]] = Field(default="travel_conversation")
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
@@ -36,6 +37,11 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         - travel_schedule: 계획중인 여행 일정 (YYYY-MM-DD~YYYY-MM-DD)
         - travel_style: 여행 계획 스타일 (즉흥, 계획, 상관없음 등등)
         - travel_theme: 계획중인 여행 테마 (자연, 힐링, 휴식, 놀거리 등등)
+        - intent: 사용자가 요청한 가장 마지막 대화 정보: {last_user_query}의 의도 정보를 추출. 
+            - travel_search: 최근, 유명한 곳, 등등에 대한 장소 검색 요청
+            - manage_calendar: 캘린더 기반의 일정 관리(수정, 등록, 삭제)를 요청
+            - travel_plan: 여행 계획을 제안, 추천, 세워달라고 요청
+            - plan_share : 여행 계획을 공유해달라고 요청한 경우
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 사용자의 메시지 목록에서 추출합니다.
         
         KET의 주의사항:
@@ -44,19 +50,23 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         - travel_place는 사용자가 명확하게 응답한 관광지와 여행 장소만 추출합니다.
         - travel_city의 경우 유추가 가능한 경우 지역명 혹은 도시명을 추출합니다.
         
+        KET가 분석해야 할 대화:
+        사용자 메시지 목록: {user_query}
+        마지막 사용자의 요청 정보: {last_user_query}
+        
         응답 JSON 형식:
         {format_instructions}
-        
-        KET가 분석해야 할 대화:
-        사용자 메시지 목록: {user_query}""")).partial(format_instructions=travel_place_parser.get_format_instructions(), today=get_kst_year_month_date_label(),)
+        """)).partial(format_instructions=travel_place_parser.get_format_instructions(), today=get_kst_year_month_date_label(),)
 
 
 def extract_travel_place_llm_parser(state: AgentState):
     messages = state.get("messages", [])
-    recent_human_messages = get_recent_human_messages(messages, limit=10)
+    recent_human_messages = get_recent_human_messages(messages, limit=6)
+    last_message = recent_human_messages[-1]
 
     formatted_prompt = extract_travel_info_prompt.format(
-        user_query=format_user_messages_with_index(recent_human_messages)
+        user_query=format_user_messages_with_index(recent_human_messages),
+        last_user_query=last_message
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 
@@ -73,4 +83,5 @@ def extract_travel_place_llm_parser(state: AgentState):
         "travel_schedule": travel_place_info.travel_schedule,
         "travel_style": travel_place_info.travel_style,
         "travel_theme": travel_place_info.travel_theme,
+        "intent": travel_place_info.intent
     }

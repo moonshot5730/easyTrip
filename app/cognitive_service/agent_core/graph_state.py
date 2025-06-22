@@ -10,7 +10,7 @@ class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
     next_node: Optional[str]
-    intent: Literal["travel_place_conversation", "travel_place_search", "manage_calendar", "travel_plan", "plan_share"]
+    intent: Literal["travel_conversation", "travel_search", "manage_calendar", "travel_plan", "plan_share"]
 
     travel_city: Optional[str]
     travel_place: Optional[List[str]]
@@ -18,7 +18,10 @@ class AgentState(TypedDict):
     travel_style: Optional[str]
     travel_theme: Optional[str]
 
-    travel_plan: Optional[dict]
+    travel_plan_markdown: Optional[str]
+    travel_plan_dict: Optional[dict]
+    travel_plan_status: Optional[Literal["complete", "progress", "feedback", "ready", "need_info"]]
+    travel_plan_feedback: Optional[str]
     share_url: Optional[str]
 
     is_websearh: Optional[bool]

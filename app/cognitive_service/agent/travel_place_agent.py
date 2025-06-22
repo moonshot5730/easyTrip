@@ -5,8 +5,7 @@ from langchain_core.prompts import PromptTemplate
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_last_message, get_recent_context)
-from app.cognitive_service.agent_llm.llm_models import creative_llm_nano
-from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, parse_tavily_results, \
+from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, \
     get_web_search_results
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import creative_openai_fallbacks

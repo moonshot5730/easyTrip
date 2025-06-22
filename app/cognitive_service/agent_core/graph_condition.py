@@ -6,37 +6,34 @@ from app.core.logger.logger_config import api_logger
 
 
 def state_router(state: AgentState) -> dict:
-    def is_blank(value):
-        return value in (None, "", "미정")
-
-    def is_blank_list(value):
-        return not value or value == ["미정"] or value == [""]
+    # def is_blank(value):
+    #     return value in (None, "", "미정")
+    #
+    # def is_blank_list(value):
+    #     return not value or value == ["미정"] or value == [""]
 
     api_logger.info(f" 현재 state 정보 : {state}")
     updated_state = state.copy()
 
-    intent = state.get("intent")
-    travel_city = state.get("travel_city")
-    travel_place = state.get("travel_place")
-    travel_schedule = state.get("travel_schedule")
-    travel_plan = state.get("travel_plan")
+    # travel_city = state.get("travel_city")
+    # travel_place = state.get("travel_place")
+    # travel_schedule = state.get("travel_schedule")
+    # travel_plan = state.get("travel_plan")
+    intent = state.get("intent") # Literal["travel_place_conversation", "travel_place_search", "manage_calendar", "travel_plan", "plan_share"]
 
     match (
-        is_blank(travel_city),
-        is_blank_list(travel_place),
-        is_blank(travel_schedule),
-        is_blank(travel_plan),
+        intent
     ):
-        case (_, _, _, False):
-            next_node = "travel_place_conversation"
-        case (False, False, False, True):
+        case "travel_conversation":
+            next_node = "travel_conversation"
+        case "manage_calendar":
             next_node = "travel_schedule"
-        case (False, False, False, True):
-            next_node = "travel_plan_conversation"
-        case (False, False, False, False):
-            next_node = "travel_plan_share"
+        case "travel_plan":
+            next_node = "travel_plan"
+        case "plan_share":
+            next_node = "plan_share"
         case _:
-            next_node = "travel_place_conversation"
+            next_node = "travel_conversation"
 
     updated_state["next_node"] = next_node
 
