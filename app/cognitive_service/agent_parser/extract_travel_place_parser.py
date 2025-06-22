@@ -20,7 +20,7 @@ class TravelPlaceOutput(BaseModel):
     travel_schedule: Optional[str] = Field(default="미정")
     travel_style: Optional[str] = Field(default="미정")
     travel_theme: Optional[str] = Field(default="미정")
-    intent: Optional[Literal["travel_search", "manage_calendar", "travel_plan", "plan_share"]] = Field(default="travel_conversation")
+    intent: Optional[Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share"]] = Field(default="travel_conversation")
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
@@ -38,9 +38,9 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         - travel_style: 여행 계획 스타일 (즉흥, 계획, 상관없음 등등)
         - travel_theme: 계획중인 여행 테마 (자연, 힐링, 휴식, 놀거리 등등)
         - intent: 사용자가 요청한 가장 마지막 대화 정보: {last_user_query}의 의도 정보를 추출. 
-            - travel_search: 최근, 유명한 곳, 등등에 대한 장소 검색 요청
+            - travel_conversation: 최근, 유명한 곳, 등등에 대한 장소 추천 및 검색 요청
             - manage_calendar: 캘린더 기반의 일정 관리(수정, 등록, 삭제)를 요청
-            - travel_plan: 여행 계획을 제안, 추천, 세워달라고 요청
+            - travel_plan: 사용자가 여행 계획을 세우고 싶은 경우, 계획을 요청한 경우
             - plan_share : 여행 계획을 공유해달라고 요청한 경우
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 사용자의 메시지 목록에서 추출합니다.
         
@@ -57,6 +57,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         응답 JSON 형식:
         {format_instructions}
         """)).partial(format_instructions=travel_place_parser.get_format_instructions(), today=get_kst_year_month_date_label(),)
+
 
 
 def extract_travel_place_llm_parser(state: AgentState):
@@ -77,11 +78,16 @@ def extract_travel_place_llm_parser(state: AgentState):
     travel_place_info = travel_place_parser.parse(llm_response.content)
     api_logger.info(travel_place_info.model_dump_json(indent=2))
 
+    new_style = travel_place_info.travel_style
+    new_theme = travel_place_info.travel_theme
+    current_style = state.get("travel_place", "")
+    current_theme = state.get("travel_place", "")
+
     return {
         "travel_city": travel_place_info.travel_city,
         "travel_place": travel_place_info.travel_place,
         "travel_schedule": travel_place_info.travel_schedule,
-        "travel_style": travel_place_info.travel_style,
-        "travel_theme": travel_place_info.travel_theme,
+        "travel_style": new_style if new_style not in (None, "") else current_style,
+        "travel_theme": new_theme if new_theme not in (None, "") else current_theme,
         "intent": travel_place_info.intent
     }

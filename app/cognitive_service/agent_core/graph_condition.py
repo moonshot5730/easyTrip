@@ -19,7 +19,7 @@ def state_router(state: AgentState) -> dict:
     # travel_place = state.get("travel_place")
     # travel_schedule = state.get("travel_schedule")
     # travel_plan = state.get("travel_plan")
-    intent = state.get("intent") # Literal["travel_place_conversation", "travel_place_search", "manage_calendar", "travel_plan", "plan_share"]
+    intent = state.get("intent") # Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share"]
 
     match (
         intent
