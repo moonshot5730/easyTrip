@@ -18,9 +18,9 @@ def create_korea_easy_trip_graph():
     graph.add_node("state_router", state_router)
 
     # 노드 등록
-    graph.add_node("travel_place_conversation", travel_place_conversation)
-    graph.add_node("extract_travel_place_llm_parser", extract_travel_place_llm_parser)
-    graph.add_node("travel_search_summary_conversation", travel_search_summary_conversation)
+    graph.add_node("travel_place_conversation", travel_place_conversation)   # 여행 장소 대화
+    graph.add_node("extract_travel_place_llm_parser", extract_travel_place_llm_parser) # 여행 정보 추출 파서
+    graph.add_node("travel_search_summary_conversation", travel_search_summary_conversation) # 여행 정보 검색결과 요약
 
     # 시작 지점
     graph.set_entry_point("state_router")

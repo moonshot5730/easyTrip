@@ -34,6 +34,7 @@ travel_place_system_prompt_template = textwrap.dedent(
     - {user_name}의 희망 여행 스타일: {travel_style}
     - {user_name}의 희망 여행 테마: {travel_theme}
     ** KET가 알고 있는 여행 정보들이 "미정" 이어도, 대화를 통해 분석 및 확인이 가능한 경우 해당 정보들을 적극 활용합니다.
+    ** 분석되지 않은 여행 정보는 자연스러운 대화로 정보를 유도합니다.
     ** 희망 여행 지역, 장소 목록이 채워진 경우 여행 일정이나 계획을 세울 수 있는 다음 단계로 안내합니다.
     
     KET의 도구 사용 규칙:

@@ -9,9 +9,13 @@ def state_router(state: AgentState) -> dict:
     def is_blank(value):
         return value in (None, "", "미정")
 
+    def is_blank_list(value):
+        return not value or value == ["미정"] or value == [""]
+
     api_logger.info(f" 현재 state 정보 : {state}")
     updated_state = state.copy()
 
+    intent = state.get("intent")
     travel_city = state.get("travel_city")
     travel_place = state.get("travel_place")
     travel_schedule = state.get("travel_schedule")
@@ -19,13 +23,13 @@ def state_router(state: AgentState) -> dict:
 
     match (
         is_blank(travel_city),
-        is_blank(travel_place),
+        is_blank_list(travel_place),
         is_blank(travel_schedule),
         is_blank(travel_plan),
     ):
-        case (_, _, True, True):
+        case (_, _, _, False):
             next_node = "travel_place_conversation"
-        case (False, False, True, True):
+        case (False, False, False, True):
             next_node = "travel_schedule"
         case (False, False, False, True):
             next_node = "travel_plan_conversation"

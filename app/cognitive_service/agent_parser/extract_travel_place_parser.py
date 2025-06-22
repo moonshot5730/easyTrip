@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_recent_human_messages)
+                                                          get_recent_human_messages, get_latest_messages)
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
@@ -42,7 +42,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         - 오늘의 날짜는 {today}야.
         - 날짜를 기준으로 여행 일정 정보를 추출해야해. [절대 과거 일정으로 추출하지 않습니다.] 
         - travel_place는 사용자가 명확하게 응답한 관광지와 여행 장소만 추출합니다.
-        - travel_place로 지역이나 도시를 추출하지 않습니다. 지역과 도시에 존재하는 장소만 추출합니다.
+        - travel_city의 경우 유추가 가능한 경우 지역명 혹은 도시명을 추출합니다.
         
         응답 JSON 형식:
         {format_instructions}
