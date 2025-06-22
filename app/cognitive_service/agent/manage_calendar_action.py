@@ -6,6 +6,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.cognitive_service.agent_core.graph_state import AgentState, get_last_human_message
 from app.cognitive_service.agent_tool.calendar_tool import calendar_tools
+from app.core.infra.sqllite_conn import init_db
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
 
@@ -15,13 +16,17 @@ def manage_calendar_action(state: AgentState):
 
     system_prompt = textwrap.dedent("""
     당신은 일정 관리 에이전트입니다.
-    아래 사용자 입력 정보와 요청 정보를 보고 적절한 일정 관련 Tool을 호출하세요.
+    아래 사용자의 요청 정보에서 의도를 분석해서 적절한 일정 관련 Tool을 호출하세요.
 
-    ### 사용 가능한 도구 목록 및 스키마
-    - register_calendar: 사용자가 새로운 일정을 등록을 요청했습니다.
-    - read_calendar: 사용자가 일정 조회를 요청했습니다.
-    - update_calendar: 사용자가 기존 일정을 삭제하고 새 일정을 등록 혹은 수정을 요청했습니다.
-    - delete_calendar: 사용자가 기존 일정을 삭제 요청했습니다.
+    사용 가능한 도구 목록 및 호출 조건:
+    - register_calendar: 사용자가 새로운 일정을 **등록하거나 추가**해달라고 요청한 경우  
+        (예: "일정 등록해줘", "새 일정 넣어줘", "여행 계획 추가해줘")
+    - read_calendar: 사용자가 **등록된 일정을 조회하거나 확인**하려는 경우  
+        (예: "내 일정 보여줘", "무슨 일정이 있는지 알려줘")
+    - update_calendar: 사용자가 기존 일정을 **수정하거나 변경, 갱신**하려는 경우  
+        (예: "일정을 바꿔줘", "수정할게", "갱신해줘", "일정 변경", "새롭게 수정해줘")
+    - delete_calendar: 사용자가 기존 일정을 **삭제하거나 지워달라고** 요청한 경우  
+        (예: "이 일정 삭제해줘", "지워줘", "계획 없애줘")
 
     사용자의 요청:
     {user_query}
@@ -97,19 +102,20 @@ def manage_calendar_action(state: AgentState):
     }
 
 if __name__ == "__main__":
+    init_db()
     async def run_test():
         test_state: AgentState = {
-            "user_query": "이번 여행 일정을 등록해줘",
+            "user_query": "이번 여행 일정을 수정해줘",
             "user_name": "문현준",
             "session_id": "test-session-123",
             "travel_plan_dict": {
-                "2025-07-01": {
+                "2025-07-08": {
                     "오전: 한옥 마을 방문\n오후: 맛집 투어"
                 },
-                "2025-07-02": {
+                "2025-07-09": {
                     "오전: 지역 축제 참석\n오후: 야시장 및 야간 투어"
                 },
-                "2025-07-03": {
+                "2025-07-10": {
                     "오전: 산책과 힐링\n오후: 전통시장 방문"
                 }
             },
