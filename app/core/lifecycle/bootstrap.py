@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.v1.planner_endpoints import trip_plan_router
-from app.core.infra.sqllite_conn import sqlite_provider, init_db
+from app.core.infra.sqllite_conn import init_db
 from app.core.lifecycle.env_setting import load_env
 from app.core.lifecycle.validate_key_setting import validate_env_keys
 

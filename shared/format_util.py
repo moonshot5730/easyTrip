@@ -1,7 +1,6 @@
 from datetime import date
 from typing import List
 
-from app.cognitive_service.agent_tool.calendar_tool import TravelPlansInput
 from app.models.travel_plan import TravelPlan
 from app.schemes.calendar_scheme import TravelPlanInput
 
