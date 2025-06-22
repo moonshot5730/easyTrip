@@ -5,7 +5,8 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_recent_context
+from app.cognitive_service.agent_core.graph_state import AgentState, get_recent_context, get_last_message, \
+    get_last_human_message
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
 from shared.format_util import format_user_messages_with_index
@@ -51,11 +52,10 @@ extract_travel_plan_prompt = PromptTemplate.from_template(
 def extract_travel_plan_llm_parser(state: AgentState):
     messages = state.get("messages", [])
     recent_messages = get_recent_context(messages, limit=4)
-    last_user_query = recent_messages[-1].content
 
     formatted_prompt = extract_travel_plan_prompt.format(
         user_query=format_user_messages_with_index(recent_messages),
-        last_user_query=last_user_query
+        last_user_query=get_last_human_message(messages)
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 

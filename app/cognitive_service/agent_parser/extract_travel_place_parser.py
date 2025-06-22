@@ -6,7 +6,8 @@ from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
 from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_recent_human_messages, get_latest_messages)
+                                                          get_recent_human_messages, get_latest_messages,
+                                                          get_last_message, get_last_human_message)
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
@@ -43,6 +44,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
             - travel_plan: 여행 계획이 만들어진 경우, 여행 계획을 요청한 경우, 여행 계획을 만들어 달라고 요청 한 경우, 여행 계획이 필요한 경우
             - plan_share : 여행 계획을 공유해달라고 요청한 경우
             - aggressive_query: 공격적이거나 폭력적인 표현을 사용한 경우
+            - 의도 파악이 어려운 경우 travel_conversation로 계속 진행
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 사용자의 메시지 목록에서 추출합니다.
         
         KET의 주의사항:
@@ -63,12 +65,11 @@ extract_travel_info_prompt = PromptTemplate.from_template(
 
 def extract_travel_place_llm_parser(state: AgentState):
     messages = state.get("messages", [])
-    recent_human_messages = get_recent_human_messages(messages, limit=6)
-    last_message = recent_human_messages[-1]
+    recent_human_messages = get_recent_human_messages(messages, limit=4)
 
     formatted_prompt = extract_travel_info_prompt.format(
         user_query=format_user_messages_with_index(recent_human_messages),
-        last_user_query=last_message
+        last_user_query=get_last_human_message(messages)
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 

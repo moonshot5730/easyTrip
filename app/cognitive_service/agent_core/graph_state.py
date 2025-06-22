@@ -11,6 +11,8 @@ class AgentState(TypedDict):
 
     next_node: Optional[str]
     intent: Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share", "aggressive_query"]
+    plan_intent: Literal["manage_calendar", "plan_share", "plan_update"]
+    plan_action: Literal["register_calendar", "read_calendar", "update_calendar", "delete_calendar"]
 
     travel_city: Optional[str]
     travel_place: Optional[List[str]]
@@ -50,6 +52,12 @@ def get_latest_messages(messages):
 
 def get_last_message(messages):
     return messages[-1].content if messages else ""
+
+def get_last_human_message(messages: list) -> str:
+    for message in reversed(messages):
+        if isinstance(message, HumanMessage):
+            return message.content
+    return ""
 
 def get_recent_context(messages, limit=4):
     recent_messages = list(
