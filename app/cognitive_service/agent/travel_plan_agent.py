@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
         result_state = travel_plan_conversation(test_state)
 
-        print("\n📌 응답 메시지:")
+        print("\n응답 메시지:")
         for msg in result_state["messages"]:
             print(f"{msg}")
 

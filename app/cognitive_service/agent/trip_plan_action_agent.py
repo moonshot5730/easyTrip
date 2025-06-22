@@ -1,3 +1,4 @@
+import asyncio
 import textwrap
 from typing import Literal
 
@@ -69,20 +70,35 @@ def travel_plan_action(state: AgentState):
 if __name__ == "__main__":
     async def run_test():
         # 테스트용 상태 정의
-        test_state: AgentState = {
+        test_calendar_state: AgentState = {
             "user_query": "이번 여행 일정을 캘린더에 등록하고 싶어.",
             "messages": [],
             "user_name": "문현준"
         }
 
-        result = travel_plan_action(test_state)
+        test_share_state: AgentState = {
+            "user_query": "이번 여행 일정을 url로 공유하고 싶어.",
+            "messages": [],
+            "user_name": "문현준"
+        }
 
-        print("\n🧠 여행 계획 행동 분석 결과:")
-        print(f"📌 plan_intent: {result['plan_intent']}")
-        print(f"🔧 plan_action: {result['plan_action']}")
-        print("\n📝 messages:")
-        for msg in result["messages"]:
-            role = getattr(msg, "type", msg.__class__.__name__)
-            print(f"\n[{role}]\n{getattr(msg, 'content', str(msg))}")
+
+        calendar_result = travel_plan_action(test_calendar_state)
+        share_result = travel_plan_action(test_share_state)
+
+        print("여행 캘린더 행동 분석 결과:")
+        print(f"plan_intent: {calendar_result['plan_intent']}")
+        print(f"plan_action: {calendar_result['plan_action']}")
+        print("messages:")
+        for msg in calendar_result["messages"]:
+            print(f"{msg}")
+
+        print("여행 계획 공유 행동 분석 결과:")
+        print(f"plan_intent: {share_result['plan_intent']}")
+        print(f"plan_action: {share_result['plan_action']}")
+        print("messages:")
+        for msg in share_result["messages"]:
+            print(f"{msg}")
+
 
     asyncio.run(run_test())

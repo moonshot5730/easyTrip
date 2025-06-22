@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
         result = travel_search_summary_conversation(test_state)
 
-        print("\n📝 요약 응답:")
+        print("\요약 응답:")
         for msg in result["messages"]:
             print(f"{msg}")
 

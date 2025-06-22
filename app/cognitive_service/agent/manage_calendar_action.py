@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
         result = manage_calendar_action(fake_state)
 
-        print("\n📌 Final State:")
+        print("\nFinal State:")
         for k, v in result.items():
             if k == "messages":
                 print(f"\n{k}:\n")

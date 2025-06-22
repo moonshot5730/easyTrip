@@ -80,8 +80,8 @@ if __name__ == "__main__":
 
         result = plan_share_action(test_state)
 
-        print(f"\n📌 공유 URL: {result.get("share_url")}")
-        print("\n🧾 메시지 기록:")
+        print(f"\n공유 URL: {result.get("share_url")}")
+        print("\n메시지 기록:")
         for message in result["messages"]:
             print(f"{message}")
 
