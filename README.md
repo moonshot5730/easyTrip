@@ -13,7 +13,9 @@
   - 여행 일정 
     - 캘린더 등록, 수정, 삭제, 조회 (Sqllite로 로컬에 저장)
 
+
 ---
+
 
 ## 2. 기능 설명
 
@@ -113,8 +115,53 @@ app/
 └── main.py
 ```
 
+### API 명세
+
+#### `GET /share/{file_name}`  
+공유된 여행 계획 HTML 파일을 렌더링해서 반환합니다.
+
+- **Path Parameter**
+  - `file_name` (string): 공유된 HTML 파일명 (세션 정보)
+- **응답**: `HTMLResponse`
 
 
+
+#### `GET /langgraph/state`
+
+특정 세션에 대한 LangGraph 상태 정보를 조회합니다. [디버깅 전용]
+
+- **Query Parameter**
+  - `session_id` (string): 세션 고유 ID
+- **응답**: JSON (에이전트 상태 정보)
+
+---
+
+#### 🔹 `POST /astream-event` (SSE 통신 사용)
+
+LangGraph 기반의 여행 일정 대화 요청을 전송하고, 스트리밍으로 AI 응답을 받습니다.
+- 해당 서버에서는 스트리밍 응답, 툴, 검색 이벤트에 대해서만 정보를 전달합니다.
+
+
+- **Body (application/json)**
+  ```json
+  {
+    "session_id": "test-session-123",
+    "message": {
+      "role": "user",
+      "content": "7월 3일에는 전통시장 가고 싶어"
+    }
+  }
+  ```
+- **응답**: Streaming (예: Server-Sent Events, Chunked JSON 등)
+```
+class SSETag(str, Enum):
+    CHAT = "chat: "      # 채팅 이벤트
+    STREAM = "stream: "  # 스트리밍 응답 이벤트
+    CHAIN = "chain: "    # 체인 이벤트
+    NODE = "node: "      # 노드 종료 이벤트
+    TOOL = "tool: "      # 툴 이벤트
+    SEARCH = "search: "  # 검색 이벤트
+```
 ---
 
 ## 4. 인지 아키텍처
