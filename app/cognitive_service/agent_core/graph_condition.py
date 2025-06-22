@@ -19,7 +19,7 @@ def state_router(state: AgentState) -> dict:
     # travel_place = state.get("travel_place")
     # travel_schedule = state.get("travel_schedule")
     # travel_plan = state.get("travel_plan")
-    intent = state.get("intent") # Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share"]
+    intent = state.get("intent") # Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share", "aggressive_query"]
 
     match (
         intent
@@ -32,6 +32,8 @@ def state_router(state: AgentState) -> dict:
             next_node = "travel_plan"
         case "plan_share":
             next_node = "plan_share"
+        case "aggressive_query":
+            next_node = "aggressive_query"
         case _:
             next_node = "travel_conversation"
 

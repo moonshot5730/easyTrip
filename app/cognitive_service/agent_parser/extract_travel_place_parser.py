@@ -40,7 +40,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         - intent: 사용자가 요청한 가장 마지막 대화 정보: {last_user_query}의 의도 정보를 추출. 
             - travel_conversation: 최근, 유명한 곳, 등등에 대한 장소 추천 및 검색 요청
             - manage_calendar: 캘린더 기반의 일정 관리(수정, 등록, 삭제)를 요청
-            - travel_plan: 사용자가 여행 계획을 세우고 싶은 경우, 계획을 요청한 경우
+            - travel_plan: 여행 계획이 만들어진 경우, 여행 계획을 요청한 경우, 여행 계획을 만들어 달라고 요청 한 경우, 여행 계획이 필요한 경우
             - plan_share : 여행 계획을 공유해달라고 요청한 경우
             - aggressive_query: 공격적이거나 폭력적인 표현을 사용한 경우
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 사용자의 메시지 목록에서 추출합니다.
