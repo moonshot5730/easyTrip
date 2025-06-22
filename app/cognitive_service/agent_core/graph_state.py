@@ -10,7 +10,7 @@ class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 
     next_node: Optional[str]
-    intent: Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share"]
+    intent: Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share", "aggressive_query"]
 
     travel_city: Optional[str]
     travel_place: Optional[List[str]]

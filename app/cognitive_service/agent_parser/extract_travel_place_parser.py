@@ -20,7 +20,7 @@ class TravelPlaceOutput(BaseModel):
     travel_schedule: Optional[str] = Field(default="미정")
     travel_style: Optional[str] = Field(default="미정")
     travel_theme: Optional[str] = Field(default="미정")
-    intent: Optional[Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share"]] = Field(default="travel_conversation")
+    intent: Optional[Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share", "aggressive_query"]] = Field(default="travel_conversation")
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
@@ -42,6 +42,7 @@ extract_travel_info_prompt = PromptTemplate.from_template(
             - manage_calendar: 캘린더 기반의 일정 관리(수정, 등록, 삭제)를 요청
             - travel_plan: 사용자가 여행 계획을 세우고 싶은 경우, 계획을 요청한 경우
             - plan_share : 여행 계획을 공유해달라고 요청한 경우
+            - aggressive_query: 공격적이거나 폭력적인 표현을 사용한 경우
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 사용자의 메시지 목록에서 추출합니다.
         
         KET의 주의사항:

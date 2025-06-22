@@ -15,7 +15,7 @@ class TravelPlanOutput(BaseModel):
     travel_plan_dict: Optional[dict] = Field(default={})
     travel_plan_markdown: Optional[str] = Field(default="")
     travel_plan_status: Optional[Literal["complete", "update"]] = Field(default="ready")
-    intent: Optional[Literal["manage_calendar", "plan_share", "travel_plan"]] = Field(default="travel_plan")
+    intent: Optional[Literal["manage_calendar", "plan_share", "travel_plan", "aggressive_query"]] = Field(default="travel_plan")
 
 travel_plan_parser = PydanticOutputParser(pydantic_object=TravelPlanOutput)
 
@@ -36,6 +36,7 @@ extract_travel_plan_prompt = PromptTemplate.from_template(
             - manage_calendar: 여행 계획에 대해서 캘린더로 일정을 관리하고 싶은 경우
             - plan_share: 완성된 여행 계획을 파일로 공유하고 싶은 경우
             - travel_plan: 여행 계획을 수정하거나 개선 하고 싶은 경우
+            - aggressive_query: 공격적이거나 폭력적인 표현을 사용한 경우
         ** 거짓된 정보, 모호한 정보는 추출하지 않습니다. 반드시 이해하고 분석한 정보 여행 계획을 추출합니다.
 
         응답 JSON 형식:
