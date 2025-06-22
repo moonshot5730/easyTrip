@@ -239,7 +239,10 @@ python -m uvicorn main:app --reload    # API 서버 실행 [ root 디렉터리(�
 ---
 
 ### 일정 추가/조회 캘린더 반영 화면
-- 예정
+![스트림릿 화면](./resources/images/demo/calendar_instruction.png)
+![스트림릿 화면](./resources/images/demo/calendar_response.png)
+![스트림릿 화면](./resources/images/demo/calendar_response_sqllite.png)
+
 
 ---
 

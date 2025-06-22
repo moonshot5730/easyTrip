@@ -95,10 +95,27 @@ def manage_calendar_action(state: AgentState):
             tool_results.append(tool_result)
             tool_messages.append(AIMessage(content=str(tool_result)))
 
+    summary_prompt = textwrap.dedent("""
+    다음은 일정 관리 도구를 통해 처리된 결과입니다:
+
+    {tool_results}
+
+    위 내용을 사용자에게 자연스럽고 친절하게 요약해 설명해주세요. 마크다운 형식은 사용하지 않아도 됩니다.
+    """).strip()
+
+    summary_messages = [
+        SystemMessage(content="당신은 사용자에게 일정 처리 결과를 요약해주는 비서입니다."),
+        HumanMessage(content=summary_prompt.format(tool_results=tool_results))
+    ]
+
+    summary_response = precise_openai_fallbacks.invoke(summary_messages)
+    tool_messages.append(AIMessage(content=summary_response.content))
+
     return {
         **state,
         "messages": state["messages"] + [HumanMessage(content=user_query)] + tool_messages,
         "calendar_info": tool_results,
+        "intent": "travel_conversation"
     }
 
 if __name__ == "__main__":
