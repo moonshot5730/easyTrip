@@ -34,7 +34,7 @@ travel_plan_action_system_prompt_template = textwrap.dedent(
         - read_calendar : 등록된 일정이 있는지 조회
         - update_calendar: 기존 등록된 일정 수정 [삭제 후 추가]
         
-    KET 응답 JSON 형삭:
+    KET 응답 JSON 형식:
     {format_instructions}
         
      사용자 요청 정보: {user_query}""")
@@ -48,12 +48,11 @@ def travel_plan_action(state: AgentState):
     api_logger.info(
         f"[travel_plan_action!!!] 현재 상태 정보입니다: {state.get("messages", [])}"
     )
-    user_query = get_last_human_message(state["messages"])
 
     system_message = SystemMessage(
         content=PromptTemplate.from_template(
             travel_plan_action_system_prompt_template
-        ).format(user_query=user_query,
+        ).format(user_query=state.get("user_query", ""),
                  format_instructions=plan_action_parser.get_format_instructions()
          )
     )

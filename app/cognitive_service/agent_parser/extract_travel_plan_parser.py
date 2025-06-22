@@ -35,7 +35,7 @@ extract_travel_plan_prompt = PromptTemplate.from_template(
             - value: 여행 계획 정보 (텍스트),
         - travel_plan_markdown: 마크다운으로 정리된 여행 계획표
         - travel_plan_status: 대화에서 분석한 여행 계획의 상태 정보
-            - 사용자가 여행 계획을 확정 했는지, 계속 수정중인지를 분석합니다.
+            - 여행계획이 생성된 경우 complete, 없는 경우 update로 처리합니다.
         - intent: 마지막 사용자의 요청 정보를 분석해서 의도를 추출합니다.
             - manage_calendar: 여행 계획에 대해서 캘린더로 일정을 관리하고 싶은 경우
             - plan_share: 완성된 여행 계획을 파일로 공유하고 싶은 경우
