@@ -18,9 +18,9 @@ from frontend.ui_component.chat_history_ui import render_chat_history
 from shared.datetime_util import get_kst_timestamp_label
 from shared.event_constant import SPLIT_PATTEN, SSETag
 
-
 st.set_page_config(page_title="🦜🔗 스트림릿 비동기 테스트", layout="wide")
 st.title(f"대한민국 여행 계획 에이전트 KET")
+
 
 def init_session_state():
     if "session_history" not in st.session_state:

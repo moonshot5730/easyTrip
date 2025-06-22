@@ -3,10 +3,10 @@ import textwrap
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_last_message, get_recent_context, get_last_human_message)
-from app.cognitive_service.agent_tool.travel_search_tool import place_search_tool, \
-    get_web_search_results
+from app.cognitive_service.agent_core.graph_state import (
+    AgentState, get_last_human_message, get_last_message, get_recent_context)
+from app.cognitive_service.agent_tool.travel_search_tool import (
+    get_web_search_results, place_search_tool)
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import creative_openai_fallbacks
 from shared.datetime_util import get_kst_year_month_date_label
@@ -64,13 +64,9 @@ travel_place_system_prompt_template = textwrap.dedent(
 
 def travel_place_conversation(state: AgentState):
     messages = state.get("messages", [])
-    api_logger.info(
-        f"[travel_place_conversation!!!] 현재 상태 정보입니다: {messages}"
-    )
+    api_logger.info(f"[travel_place_conversation!!!] 현재 상태 정보입니다: {messages}")
 
-    user_query = state.get("user_query") or get_last_human_message(
-        messages=messages
-    )
+    user_query = state.get("user_query") or get_last_human_message(messages=messages)
     new_user_message = HumanMessage(content=user_query)
 
     system_message = SystemMessage(
@@ -89,15 +85,17 @@ def travel_place_conversation(state: AgentState):
 
     recent_messages = get_recent_context(state.get("messages", []), limit=4)
     new_messages = [system_message] + recent_messages + [new_user_message]
-    llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(new_messages)
+    llm_response = creative_openai_fallbacks.bind_tools([place_search_tool]).invoke(
+        new_messages
+    )
 
     tool_messages = get_web_search_results(llm_response)
     websearch_results = "\n\n".join(msg.content for msg in tool_messages)
 
     return {
-        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)] + tool_messages,
+        "messages": recent_messages
+        + [new_user_message, AIMessage(content=llm_response.content)]
+        + tool_messages,
         "is_websearh": True if tool_messages else False,
         "websearch_results": websearch_results,
     }
-
-

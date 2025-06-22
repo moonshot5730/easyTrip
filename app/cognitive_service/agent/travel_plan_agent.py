@@ -1,11 +1,14 @@
 import textwrap
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_last_message, get_recent_context
+from app.cognitive_service.agent_core.graph_state import (AgentState,
+                                                          get_last_message,
+                                                          get_recent_context)
 from app.core.logger.logger_config import api_logger
-from app.external.openai.openai_client import creative_openai_fallbacks, precise_openai_fallbacks
+from app.external.openai.openai_client import (creative_openai_fallbacks,
+                                               precise_openai_fallbacks)
 from shared.datetime_util import get_kst_year_month_date_label
 
 travel_plan_system_prompt_template = textwrap.dedent(
@@ -64,9 +67,7 @@ def travel_plan_conversation(state: AgentState):
     new_user_message = HumanMessage(content=user_query)
 
     system_message = SystemMessage(
-        content=PromptTemplate.from_template(
-            travel_plan_system_prompt_template
-        ).format(
+        content=PromptTemplate.from_template(travel_plan_system_prompt_template).format(
             user_name=state.get("user_name", "사용자"),
             today=get_kst_year_month_date_label(),
             travel_city=state.get("travel_city", "미정"),
@@ -82,6 +83,6 @@ def travel_plan_conversation(state: AgentState):
     llm_response = precise_openai_fallbacks.invoke(messages)
 
     return {
-        "messages": recent_messages + [new_user_message, AIMessage(content=llm_response.content)]
+        "messages": recent_messages
+        + [new_user_message, AIMessage(content=llm_response.content)]
     }
-

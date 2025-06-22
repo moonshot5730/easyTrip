@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field
 from app.cognitive_service.agent_core.graph_state import (AgentState,
                                                           get_latest_messages)
 from app.core.logger.logger_config import get_logger
-from app.external.openai.openai_client import precise_llm_nano, precise_openai_fallbacks
+from app.external.openai.openai_client import (precise_llm_nano,
+                                               precise_openai_fallbacks)
 
 logger = get_logger()
 

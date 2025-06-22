@@ -35,7 +35,7 @@ async def trip_plan_agent_chat(chat_request: ChatRequest) -> StreamingResponse:
     streaming_events = agent_app.astream_events(
         input={
             "user_query": user_message.content,
-            "user_name": chat_request.get("user_name", "사용자")
+            "user_name": chat_request.get("user_name", "사용자"),
         },
         version="v2",
         stream_mode=["updates"],

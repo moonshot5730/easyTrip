@@ -79,4 +79,3 @@ precise_llm_mini = ChatOpenAI(
 )
 
 precise_openai_fallbacks = precise_llm_mini.with_fallbacks([precise_llm_nano])
-

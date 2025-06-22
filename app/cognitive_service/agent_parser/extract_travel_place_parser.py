@@ -1,13 +1,13 @@
 import textwrap
-from typing import List, Optional, Literal
+from typing import List, Literal, Optional
 
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
-from app.cognitive_service.agent_core.graph_state import (AgentState,
-                                                          get_recent_human_messages, get_latest_messages,
-                                                          get_last_message, get_last_human_message)
+from app.cognitive_service.agent_core.graph_state import (
+    AgentState, get_last_human_message, get_last_message, get_latest_messages,
+    get_recent_human_messages)
 from app.cognitive_service.agent_llm.llm_models import precise_llm_nano
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
@@ -21,7 +21,16 @@ class TravelPlaceOutput(BaseModel):
     travel_schedule: Optional[str] = Field(default="미정")
     travel_style: Optional[str] = Field(default="미정")
     travel_theme: Optional[str] = Field(default="미정")
-    intent: Optional[Literal["travel_conversation", "manage_calendar", "travel_plan", "plan_share", "aggressive_query"]] = Field(default="travel_conversation")
+    intent: Optional[
+        Literal[
+            "travel_conversation",
+            "manage_calendar",
+            "travel_plan",
+            "plan_share",
+            "aggressive_query",
+        ]
+    ] = Field(default="travel_conversation")
+
 
 travel_place_parser = PydanticOutputParser(pydantic_object=TravelPlaceOutput)
 
@@ -59,8 +68,12 @@ extract_travel_info_prompt = PromptTemplate.from_template(
         
         응답 JSON 형식:
         {format_instructions}
-        """)).partial(format_instructions=travel_place_parser.get_format_instructions(), today=get_kst_year_month_date_label(),)
-
+        """
+    )
+).partial(
+    format_instructions=travel_place_parser.get_format_instructions(),
+    today=get_kst_year_month_date_label(),
+)
 
 
 def extract_travel_place_llm_parser(state: AgentState):
@@ -69,7 +82,7 @@ def extract_travel_place_llm_parser(state: AgentState):
 
     formatted_prompt = extract_travel_info_prompt.format(
         user_query=format_user_messages_with_index(recent_human_messages),
-        last_user_query=get_last_human_message(messages)
+        last_user_query=get_last_human_message(messages),
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 
@@ -91,5 +104,5 @@ def extract_travel_place_llm_parser(state: AgentState):
         "travel_schedule": travel_place_info.travel_schedule,
         "travel_style": new_style if new_style not in (None, "") else current_style,
         "travel_theme": new_theme if new_theme not in (None, "") else current_theme,
-        "intent": travel_place_info.intent
+        "intent": travel_place_info.intent,
     }

@@ -6,7 +6,7 @@ LANG_STATE_URL = "http://localhost:8000/trip/plan/langgraph/state"
 START_MESSAGE = {
     "role": "assistant",
     "content": textwrap.dedent(
-    """
+        """
     안녕하세요! 여행의 시작을 도와드릴 KET예요. 😊
     
     대한민국의 매력적인 여행지를 소개해 드리고, 원하는 스타일에 딱 맞는 여행 계획을 함께 만들어 드릴게요.

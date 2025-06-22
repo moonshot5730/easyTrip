@@ -1,12 +1,12 @@
 import textwrap
-from typing import Optional, Literal, List
+from typing import List, Literal, Optional
 
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
-from app.cognitive_service.agent_core.graph_state import AgentState, get_recent_context, get_last_message, \
-    get_last_human_message
+from app.cognitive_service.agent_core.graph_state import (
+    AgentState, get_last_human_message, get_last_message, get_recent_context)
 from app.core.logger.logger_config import api_logger
 from app.external.openai.openai_client import precise_openai_fallbacks
 from shared.format_util import format_user_messages_with_index
@@ -16,7 +16,10 @@ class TravelPlanOutput(BaseModel):
     travel_plan_dict: Optional[dict] = Field(default={})
     travel_plan_markdown: Optional[str] = Field(default="")
     travel_plan_status: Optional[Literal["complete", "update"]] = Field(default="ready")
-    intent: Optional[Literal["manage_calendar", "plan_share", "travel_plan", "aggressive_query"]] = Field(default="travel_plan")
+    intent: Optional[
+        Literal["manage_calendar", "plan_share", "travel_plan", "aggressive_query"]
+    ] = Field(default="travel_plan")
+
 
 travel_plan_parser = PydanticOutputParser(pydantic_object=TravelPlanOutput)
 
@@ -46,7 +49,9 @@ extract_travel_plan_prompt = PromptTemplate.from_template(
         KET가 분석해야 할 대화:
         최근 대화 정보: {user_query}
         마지막 사용자 요청: {last_user_query}
-        """)).partial(format_instructions=travel_plan_parser.get_format_instructions())
+        """
+    )
+).partial(format_instructions=travel_plan_parser.get_format_instructions())
 
 
 def extract_travel_plan_llm_parser(state: AgentState):
@@ -55,7 +60,7 @@ def extract_travel_plan_llm_parser(state: AgentState):
 
     formatted_prompt = extract_travel_plan_prompt.format(
         user_query=format_user_messages_with_index(recent_messages),
-        last_user_query=get_last_human_message(messages)
+        last_user_query=get_last_human_message(messages),
     )
     llm_response = precise_openai_fallbacks.invoke(formatted_prompt)
 

@@ -38,9 +38,7 @@ def parse_tavily_results_markdown(tool_result: dict) -> str:
 
         title = item.get("title", "제목 없음")
         url = item.get("url", "#")
-        result_lines.append(
-            f"**{idx}. [{title}]({url})**\n"
-        )
+        result_lines.append(f"**{idx}. [{title}]({url})**\n")
 
     return "\n".join(result_lines) + "\n---\n"
 
