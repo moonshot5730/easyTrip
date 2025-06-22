@@ -18,7 +18,7 @@ allowed_origins = [
 async def lifespan(app: FastAPI):
     load_env()
     validate_env_keys()
-    await init_db()
+    init_db()
     # validate_llm_keys()  서버 시작할 때 의존하고 있는 llm_key가 유효한지 확인하는 테스트.
     yield
 

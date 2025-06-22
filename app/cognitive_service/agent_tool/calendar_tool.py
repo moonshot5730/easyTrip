@@ -16,18 +16,18 @@ def register_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """여행 일정을 등록합니다. 이미 존재하면 등록 불가."""
     register_plans = convert_input_to_travel_plans(session_id, plans)
 
-    return asyncio.run(_register_calendar(session_id, register_plans))
+    return _register_calendar(session_id, register_plans)
 
-async def _register_calendar(session_id: str, travel_plans: List[TravelPlan]) -> dict:
+def _register_calendar(session_id: str, travel_plans: List[TravelPlan]) -> dict:
     try:
-        existing = await get_all_plan_by_session(session_id=session_id)
+        existing = get_all_plan_by_session(session_id=session_id)
         if existing:
             return {
                 "status": "error",
                 "message": f"{session_id} 세션에는 이미 등록된 일정이 있어요. 중복 등록할 수 없습니다. 등록된 일정 정보: {existing}"
             }
 
-        created_plans = await create_plans(travel_plans)
+        created_plans = create_plans(travel_plans)
         return {
             "status": "success",
             "message": f"{created_plans} 일정들이 성공적으로 등록되었습니다."
@@ -40,11 +40,11 @@ async def _register_calendar(session_id: str, travel_plans: List[TravelPlan]) ->
 def read_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """등록된 일정을 조회합니다."""
 
-    return asyncio.run(_read_calendar(session_id=session_id))
+    return _read_calendar(session_id=session_id)
 
-async def _read_calendar(session_id: str) -> dict:
+def _read_calendar(session_id: str) -> dict:
     try:
-        existing = await get_all_plan_by_session(session_id=session_id)
+        existing = get_all_plan_by_session(session_id=session_id)
         if existing:
             return {
             "status": "success",
@@ -63,19 +63,19 @@ def update_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """여행 일정을 수정합니다. 이미 존재하면 삭제 후 새로운 데이터 추가."""
     register_plans = convert_input_to_travel_plans(session_id, plans)
 
-    return asyncio.run(_update_calendar(session_id=session_id, new_plans=register_plans))
+    return _update_calendar(session_id=session_id, new_plans=register_plans)
 
-async def _update_calendar(session_id: str, new_plans: List[TravelPlan]) -> dict:
+def _update_calendar(session_id: str, new_plans: List[TravelPlan]) -> dict:
     try:
-        delete_results = await delete_plans_by_session(session_id=session_id)
+        delete_results = delete_plans_by_session(session_id=session_id)
         if delete_results:
-            created_plans = await create_plans(new_plans)
+            created_plans = create_plans(new_plans)
             return {
                 "status": "success",
                 "message": f"{delete_results} 일정을 모두 삭제했습니다. {created_plans}를 새로 등록했습니다."
             }
         else:
-            created_plans = await create_plans(new_plans)
+            created_plans = create_plans(new_plans)
             return{
                 "status": "success",
                 "message": f"기존에 등록된 일정이 없습니다.{created_plans}을 새로 등록합니다."
@@ -86,12 +86,12 @@ async def _update_calendar(session_id: str, new_plans: List[TravelPlan]) -> dict
 @tool("delete_calendar", args_schema=TravelPlansInput)
 def delete_calendar(session_id: str, plans: List[TravelPlanInput]) -> dict:
     """session_id로 등록된 일정을 모두 삭제합니다."""
-    return asyncio.run(_delete_calendar(session_id=session_id))
+    return _delete_calendar(session_id=session_id)
 
 
-async def _delete_calendar(session_id: str,) -> dict:
+def _delete_calendar(session_id: str,) -> dict:
     try:
-        delete_results = await delete_plans_by_session(session_id=session_id)
+        delete_results =  delete_plans_by_session(session_id=session_id)
         if delete_results:
             return {
                 "status": "success",

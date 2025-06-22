@@ -1,58 +1,57 @@
 from typing import Optional, List
 
 from sqlalchemy import delete
-from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, Session
 
-from app.core.infra.sqllite_conn import sqllite_aio_engine
+from app.core.infra.sqllite_conn import sqllite_engine
 from app.models.travel_plan import TravelPlan
 
 
-async def create_plan(plan: TravelPlan) -> TravelPlan:
-    async with AsyncSession(sqllite_aio_engine) as session:
+def create_plan(plan: TravelPlan) -> TravelPlan:
+    with Session(sqllite_engine) as session:
         session.add(plan)
-        await session.commit()
-        await session.refresh(plan)
+        session.commit()
+        session.refresh(plan)
         return plan
 
 
-async def create_plans(plans: List[TravelPlan]) -> List[TravelPlan]:
-    async with AsyncSession(sqllite_aio_engine) as session:
-        session.add_all(plans)  # 여러 개 추가
-        await session.commit()
-
+def create_plans(plans: List[TravelPlan]) -> List[TravelPlan]:
+    with Session(sqllite_engine) as session:
+        session.add_all(plans)
+        session.commit()
         return plans
 
 
-async def get_all_plan_by_session(session_id: str) -> Optional[List[TravelPlan]]:
-    async with AsyncSession(sqllite_aio_engine) as session:
-        result = await session.exec(
+def get_all_plan_by_session(session_id: str) -> Optional[List[TravelPlan]]:
+    with Session(sqllite_engine) as session:
+        result = session.exec(
             select(TravelPlan).where(TravelPlan.session_id == session_id)
         )
         plans = result.all()
         return plans if plans else None
 
 
-
-async def delete_plans_by_session(session_id: str) -> List[TravelPlan]:
-    async with AsyncSession(sqllite_aio_engine) as session:
-        result = await session.exec(
+def delete_plans_by_session(session_id: str) -> int:
+    with Session(sqllite_engine) as session:
+        result = session.exec(
             delete(TravelPlan).where(TravelPlan.session_id == session_id)
         )
-        await session.commit()
-        return result
+        session.commit()
+        return result.rowcount  # 삭제된 row 수 반환
 
 
-
-async def replace_plans_by_session(session_id: str, new_plans: List[TravelPlan]) -> List[TravelPlan]:
-    async with AsyncSession(sqllite_aio_engine) as session:
+def replace_plans_by_session(session_id: str, new_plans: List[TravelPlan]) -> List[TravelPlan]:
+    with Session(sqllite_engine) as session:
         # 1. 기존 삭제
-        await delete_plans_by_session(session_id=session_id)
-        await create_plans(new_plans)
-        await session.commit()
+        session.exec(delete(TravelPlan).where(TravelPlan.session_id == session_id))
+        session.commit()
 
-        # 3. 새로 삽입된 결과 조회 및 반환
-        result = await session.exec(
+        # 2. 새로 삽입
+        session.add_all(new_plans)
+        session.commit()
+
+        # 3. 조회 및 반환
+        result = session.exec(
             select(TravelPlan).where(TravelPlan.session_id == session_id)
         )
         return result.all()

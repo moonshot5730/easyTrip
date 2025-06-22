@@ -31,9 +31,10 @@ def manage_calendar_action(state: AgentState):
 
     세션 식별자(session_id): {session_id}
 
-    반드시 tool 값은 위에서 설명한 네 가지 중 하나여야 합니다.
-    응답 시 반드시 위 도구 중 하나를 JSON 포맷으로 호출해야 하며, 다음 규칙을 지켜야 합니다:
-
+    아래 도구 중 하나를 반드시 호출하세요.
+    register_calendar, read_calendar, update_calendar, delete_calendar
+    
+    아래의 JSON응답을 도구 인자 정보로 활용하세요.
     ```json
     {{
       "tool": "register_calendar",
@@ -65,19 +66,26 @@ def manage_calendar_action(state: AgentState):
 
     # ToolCall 결과 추출
     tool_calls = getattr(response, "tool_calls", None)
+    api_logger.info(f"tool_calls 정보: {tool_calls}")
+
     tool_results = []
     tool_messages = []
 
     if tool_calls:
         for call in tool_calls:
             tool_name = call["name"]
-            args = call["args"]
+            args = call["args"]  # 딕셔너리 형태
 
-            # SQLite 내부 함수 실행
-            tool_result = next(
-                (tool.invoke(args) for tool in calendar_tools if tool.name == tool_name),
-                {"status": "error", "message": f"Unknown tool: {tool_name}"}
-            )
+            # 해당 tool 찾아서 kwargs로 언팩 호출
+            tool_instance = next((tool for tool in calendar_tools if tool.name == tool_name), None)
+
+            if tool_instance:
+                try:
+                    tool_result = tool_instance.invoke(args)  # ✅ 핵심 수정
+                except Exception as e:
+                    tool_result = {"status": "error", "message": str(e)}
+            else:
+                tool_result = {"status": "error", "message": f"Unknown tool: {tool_name}"}
 
             tool_results.append(tool_result)
             tool_messages.append(AIMessage(content=str(tool_result)))
